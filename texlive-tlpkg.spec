@@ -60,7 +60,7 @@ cat > %{buildroot}%{_sbindir}/mktexlsr.pre << EOF
     flock -n 9 || exit 1
     if [ -f /var/run/mktexlsr ]; then
 	N=`cat /var/run/mktexlsr`
-	N=`expr \$N + 1`
+	N=\`expr \$N + 1\`
     else
 	N=1
     fi
@@ -74,8 +74,8 @@ cat > %{buildroot}%{_sbindir}/mktexlsr.post << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/mktexlsr ]; then
-	N=`cat /var/run/mktexlsr`
-	N=`expr \$N - 1`
+	N=\`cat /var/run/mktexlsr\`
+	N=\`expr \$N - 1\`
     else
 	N=0
     fi
