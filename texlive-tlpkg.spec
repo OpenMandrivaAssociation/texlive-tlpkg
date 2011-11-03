@@ -1,3 +1,5 @@
+%define _tlpkgdir			%{_datadir}/tlpkg
+%define _tlpkgobjdir			%{_tlpkgdir}/tlpobj
 %define _texmfdir			%{_datadir}/texmf
 %define _texmfdistdir			%{_datadir}/texmf-dist
 %define _texmflocaldir			%{_datadir}/texmf-local
@@ -43,7 +45,7 @@ all the major TeX-related programs, macro packages, and fonts that are
 free software, including support for many languages around the world.
 
 %files
-%{_datadir}/tlpkg
+%{_tlpkgdir}
 %{_sbindir}/mktexlsr.*
 %{_sbindir}/mtxrun.*
 %{_sbindir}/fmtutil.*
@@ -59,8 +61,8 @@ free software, including support for many languages around the world.
 %build
 
 %install
-mkdir -p %{buildroot}%{_datadir}/tlpkg
-cp -fpr tlpkg/TeXLive %{buildroot}%{_datadir}/tlpkg
+mkdir -p %{buildroot}%{_tlpkgobjdir}
+cp -fpr tlpkg/TeXLive %{buildroot}%{_tlpkgdir}
 
 mkdir -p %{buildroot}%{_texmf_fmtutil_d}
 mkdir -p %{buildroot}%{_texmf_updmap_d}
@@ -369,10 +371,12 @@ chmod +x %{buildroot}%{_sbindir}/language.lua.post
 #-----------------------------------------------------------------------
 install -m755 %{SOURCE1} %{buildroot}%{_sbindir}/tlpobj2spec
 
-install -m644 %{SOURCE2} %{buildroot}%{_datadir}/tlpkg
+install -m644 %{SOURCE2} %{buildroot}%{_tlpkgdir}
 
 mkdir -p %{buildroot}%{_sys_macros_dir}
 cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
+%%_tlpkgdir                      %{_tlpkgdir}
+%%_tlpkgobjdir			 %{_tlpkgobjdir}
 %%_texmfdir                      %{_texmfdir}
 %%_texmfdistdir                  %{_texmfdistdir}
 %%_texmflocaldir                 %{_texmflocaldir}
