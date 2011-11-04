@@ -8,11 +8,11 @@
 %define _texmfprojectdir		%{_datadir}/texmf-project
 %define _texmfvardir			%{_localstatedir}/lib/texmf
 %define _texmfconfdir			%{_sysconfdir}/texmf
-%define _texmf_fmtutil_d		%{_datadir}/tlpkg/%{_vendor}/fmtutil.cnf.d
-%define _texmf_updmap_d			%{_datadir}/tlpkg/%{_vendor}/updmap.cfg.d
-%define _texmf_language_dat_d		%{_datadir}/tlpkg/%{_vendor}/language.dat.d
-%define _texmf_language_def_d		%{_datadir}/tlpkg/%{_vendor}/language.def.d
-%define _texmf_language_lua_d		%{_datadir}/tlpkg/%{_vendor}/language.lua.d
+%define _texmf_fmtutil_d		%{_datadir}/tlpkg/fmtutil.cnf.d
+%define _texmf_updmap_d			%{_datadir}/tlpkg/updmap.cfg.d
+%define _texmf_language_dat_d		%{_datadir}/tlpkg/language.dat.d
+%define _texmf_language_def_d		%{_datadir}/tlpkg/language.def.d
+%define _texmf_language_lua_d		%{_datadir}/tlpkg/language.lua.d
 
 %define _texmf_enable_asymptote		0
 %define _texmf_enable_xindy		0
