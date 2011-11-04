@@ -32,10 +32,9 @@ URL:		http://tug.org/texlive/
 Group:		Publishing
 License:	http://www.tug.org/texlive/LICENSE.TL
 Source0:	http://mirrors.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-Source1:	tlpobj2spec.pl
-# intermediate, matching monolithic packages
-# and useful for initial work
-Source2:	texlive.tlpdb
+Source1:	http://mirrors.ctan.org/systems/texlive/tlnet/tlpkg/texlive.tlpdb.xz
+Source2:	tlpobj2spec.pl
+Source3:	checkupdates.pl
 BuildArch:	noarch
 
 %description
@@ -45,7 +44,14 @@ all the major TeX-related programs, macro packages, and fonts that are
 free software, including support for many languages around the world.
 
 %files
-%{_tlpkgdir}
+%dir %{_tlpkgdir}
+%{_tlpkgdir}/TeXLive
+%dir %{_tlpkgobjdir}
+%dir %{_texmf_fmtutil_d}
+%dir %{_texmf_updmap_d}
+%dir %{_texmf_language_dat_d}
+%dir %{_texmf_language_def_d}
+%dir %{_texmf_language_lua_d}
 %{_sbindir}/mktexlsr.*
 %{_sbindir}/mtxrun.*
 %{_sbindir}/fmtutil.*
@@ -53,6 +59,7 @@ free software, including support for many languages around the world.
 %{_sbindir}/language.*
 %{_sbindir}/tlpobj2spec
 %{_sys_macros_dir}/texlive.macros
+%doc %{_tlpkgdir}/texlive.tlpdb
 
 #-----------------------------------------------------------------------
 %prep
@@ -369,9 +376,9 @@ EOF
 chmod +x %{buildroot}%{_sbindir}/language.lua.post
 
 #-----------------------------------------------------------------------
-install -m755 %{SOURCE1} %{buildroot}%{_sbindir}/tlpobj2spec
+xz -d < %{SOURCE1} > %{buildroot}%{_tlpkgdir}/texlive.tlpdb
 
-install -m644 %{SOURCE2} %{buildroot}%{_tlpkgdir}
+install -m755 %{SOURCE2} %{buildroot}%{_sbindir}/tlpobj2spec
 
 mkdir -p %{buildroot}%{_sys_macros_dir}
 cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
