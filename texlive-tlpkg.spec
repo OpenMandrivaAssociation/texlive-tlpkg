@@ -37,6 +37,8 @@ Source2:	tlpobj2spec.pl
 Source3:	checkupdates.pl
 BuildArch:	noarch
 
+Requires:	texlive-kpathsea.bin
+
 %description
 TeX Live is an easy way to get up and running with the TeX document
 production system. It provides a comprehensive TeX system. It includes
@@ -420,6 +422,6 @@ cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
 %%_texmf_language_dat_post      %{_sbindir}/language.dat.post
 %%_texmf_language_def_pre       %{_sbindir}/language.def.pre
 %%_texmf_language_def_post      %{_sbindir}/language.def.post
-%%_texmf_language_lua_pre       %{_sbindir}/language.dat.lua.pre
-%%_texmf_language_lua_post      %{_sbindir}/language.dat.lua.post
+%%_texmf_language_lua_pre       %{_sbindir}/language.lua.pre
+%%_texmf_language_lua_post      %{_sbindir}/language.lua.post
 EOF
