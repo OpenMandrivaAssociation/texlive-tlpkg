@@ -1,3 +1,5 @@
+%define _requires_exceptions		perl(Text::Unidecode)\\|perl(Tie::Watch)\\|perl(SelfLoader)
+
 %define _tlpkgdir			%{_datadir}/tlpkg
 %define _tlpkgobjdir			%{_tlpkgdir}/tlpobj
 %define _texmfdir			%{_datadir}/texmf
@@ -26,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111030
-Release:	1
+Release:	2
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
