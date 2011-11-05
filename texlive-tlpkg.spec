@@ -34,10 +34,15 @@ License:	http://www.tug.org/texlive/LICENSE.TL
 Source0:	http://mirrors.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 Source1:	http://mirrors.ctan.org/systems/texlive/tlnet/tlpkg/texlive.tlpdb.xz
 Source2:	tlpobj2spec.pl
-Source3:	checkupdates.pl
+Source3:	fmtutil-hdr.cnf
+Source4:	updmap-hdr.cfg
+Source5:	checkupdates.pl
 BuildArch:	noarch
 
-Requires:	texlive-kpathsea.bin
+%post
+    if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
+	cp -f %{_texmfdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
+    fi
 
 %description
 TeX Live is an easy way to get up and running with the TeX document
@@ -48,12 +53,15 @@ free software, including support for many languages around the world.
 %files
 %dir %{_tlpkgdir}
 %{_tlpkgdir}/TeXLive
+%{_texmfdir}/web2c/fmtutil-hdr.cnf
+%{_texmfdir}/web2c/updmap-hdr.cfg
 %dir %{_tlpkgobjdir}
 %dir %{_texmf_fmtutil_d}
 %dir %{_texmf_updmap_d}
 %dir %{_texmf_language_dat_d}
 %dir %{_texmf_language_def_d}
 %dir %{_texmf_language_lua_d}
+%ghost %{_texmfconfdir}/web2c/updmap.cfg
 %{_sbindir}/mktexlsr.*
 %{_sbindir}/mtxrun.*
 %{_sbindir}/fmtutil.*
@@ -107,7 +115,7 @@ cat > %{buildroot}%{_sbindir}/mktexlsr.post << EOF
 	N=0
     fi
     if [ \$N -lt 1 ]; then
-	/usr/bin/mktexlsr /usr/share/texmf /usr/share/texmf-dist > /dev/null
+	/usr/bin/mktexlsr %{_texmfdir} %{_texmfdistdir} > /dev/null
 	rm -f /var/run/mktexlsr
     else
 	echo \$N > /var/run/mktexlsr
@@ -180,14 +188,14 @@ cat > %{buildroot}%{_sbindir}/fmtutil.post << EOF
     fi
     if [ \$N -lt 1 ]; then
 	(
-	    cat %{_texmfdir}/texmf/web2c/fmtutil-hdr.cnf
-	    for file in %{_texmf_fmtutil_d}/*; do
+	    cat %{_texmfdir}/web2c/fmtutil-hdr.cnf
+	    for file in \`find %{_texmf_fmtutil_d}/ -type f\`; do
 		cat \$file
 	    done
-	    if [ -f %{_texmflocaldir}/texmf/web2c/fmtutil-local.cnf ]; then
-		cat %{_texmflocaldir}/texmf/web2c/fmtutil-local.cnf
+	    if [ -f %{_texmflocaldir}/web2c/fmtutil-local.cnf ]; then
+		cat %{_texmflocaldir}/web2c/fmtutil-local.cnf
 	    fi
-	) > %{_texmfdir}/web2c/fmtuitl.cnf
+	) > %{_texmfdir}/web2c/fmtutil.cnf
 	/usr/bin/fmtutil-sys --all > /dev/null
 	rm -f /var/run/fmtutil
     else
@@ -225,15 +233,15 @@ cat > %{buildroot}%{_sbindir}/updmap.post << EOF
     fi
     if [ \$N -lt 1 ]; then
 	(
-	    cat %{_texmfdir}/texmf/web2c/updmap-hdr.cfg
-	    for file in %{_texmf_updmap_d}/*; do
+	    cat %{_texmfdir}/web2c/updmap-hdr.cfg
+	    for file in \`find %{_texmf_updmap_d}/ -type f\`; do
 		cat \$file
 	    done
-	    if [ -f %{_texmflocaldir}/texmf/web2c/updmap-local.cfg ]; then
-		cat %{_texmflocaldir}/texmf/web2c/updmap-local.cfg
+	    if [ -f %{_texmflocaldir}/web2c/updmap-local.cfg ]; then
+		cat %{_texmflocaldir}/web2c/updmap-local.cfg
 	    fi
-	) > %{_texmfdir}/web2c/updmap.cfg
-	/usr/bin/updmap-sys --nohash > /dev/null
+	) > %{_texmfconfdir}/web2c/updmap.cfg
+	/usr/bin/updmap-sys --syncwithtrees > /dev/null
 	rm -f /var/run/updmap
     else
 	echo \$N > /var/run/updmap
@@ -271,7 +279,7 @@ cat > %{buildroot}%{_sbindir}/language.dat.post << EOF
     if [ \$N -lt 1 ]; then
 	(
 	    cat %{_texmfdir}/tex/generic/config/language.us
-	    for file in %{_texmf_language_dat_d}/*; do
+	    for file in \`find %{_texmf_language_dat_d}/ -type f\`; do
 		cat \$file
 	    done
 	    if [ -f %{_texmflocaldir}/tex/generic/config/language-local.dat ]; then
@@ -299,6 +307,7 @@ cat > %{buildroot}%{_sbindir}/language.def.pre << EOF
     fi
     echo \$N > /var/run/language.def
 ) 9>/var/run/language.def.lock
+rm /var/run/language.def.lock
 EOF
 chmod +x %{buildroot}%{_sbindir}/language.def.pre
 
@@ -315,7 +324,7 @@ cat > %{buildroot}%{_sbindir}/language.def.post << EOF
     if [ \$N -lt 1 ]; then
 	(
 	    cat %{_texmfdir}/tex/generic/config/language.us.def
-	    for file in %{_texmf_language_def_d}/*; do
+	    for file in \`find %{_texmf_language_def_d}/ -type f\`; do
 		cat \$file
 	    done
 	    if [ -f %{_texmflocaldir}/tex/generic/config/language-local.def ]; then
@@ -362,12 +371,13 @@ cat > %{buildroot}%{_sbindir}/language.lua.post << EOF
     if [ \$N -lt 1 ]; then
 	(
 	    cat %{_texmfdir}/tex/generic/config/language.us.lua
-	    for file in %{_texmf_language_lua_d}/*; do
+	    for file in \`find %{_texmf_language_lua_d}/ -type f\`; do
 		cat \$file
 	    done
 	    if [ -f %{_texmflocaldir}/tex/generic/config/language-local.dat.lua ]; then
 		cat %{_texmflocaldir}/tex/generic/config/language-local.dat.lua
 	    fi
+	    echo "}"
 	) > %{_texmfdir}/tex/generic/config/language.dat.lua
 	rm -f /var/run/language.lua
     else
@@ -379,8 +389,10 @@ chmod +x %{buildroot}%{_sbindir}/language.lua.post
 
 #-----------------------------------------------------------------------
 xz -d < %{SOURCE1} > %{buildroot}%{_tlpkgdir}/texlive.tlpdb
-
 install -m755 %{SOURCE2} %{buildroot}%{_sbindir}/tlpobj2spec
+install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
+install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
+install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 
 mkdir -p %{buildroot}%{_sys_macros_dir}
 cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
