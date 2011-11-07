@@ -428,14 +428,14 @@ cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
 %%_texmf_mktexlsr_post           %{_sbindir}/mktexlsr.post
 %%_texmf_mtxrun_pre              %{_sbindir}/mtxrun.pre
 %%_texmf_mtxrun_post             %{_sbindir}/mtxrun.post
-%%_texmf_fmtutil_pre            %{_sbindir}/fmtutil.pre
-%%_texmf_fmtutil_post           %{_sbindir}/fmtutil.post
-%%_texmf_updmap_pre             %{_sbindir}/updmap.pre
-%%_texmf_updmap_post            %{_sbindir}/updmap.post
-%%_texmf_language_dat_pre       %{_sbindir}/language.dat.pre
-%%_texmf_language_dat_post      %{_sbindir}/language.dat.post
-%%_texmf_language_def_pre       %{_sbindir}/language.def.pre
-%%_texmf_language_def_post      %{_sbindir}/language.def.post
-%%_texmf_language_lua_pre       %{_sbindir}/language.lua.pre
-%%_texmf_language_lua_post      %{_sbindir}/language.lua.post
+%%_texmf_fmtutil_pre             %{_sbindir}/fmtutil.pre
+%%_texmf_fmtutil_post            %{_sbindir}/fmtutil.post
+%%_texmf_updmap_pre              %{_sbindir}/updmap.pre
+%%_texmf_updmap_post             %{_sbindir}/updmap.post
+%%_texmf_language_dat_pre        %{_sbindir}/language.dat.pre
+%%_texmf_language_dat_post       %{_sbindir}/language.dat.post
+%%_texmf_language_def_pre        %{_sbindir}/language.def.pre
+%%_texmf_language_def_post       %{_sbindir}/language.def.post
+%%_texmf_language_lua_pre        %{_sbindir}/language.lua.pre
+%%_texmf_language_lua_post       %{_sbindir}/language.lua.post
 EOF
