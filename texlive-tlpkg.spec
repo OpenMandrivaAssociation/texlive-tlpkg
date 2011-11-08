@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111030
-Release:	2
+Release:	3
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -96,7 +96,7 @@ cat > %{buildroot}%{_sbindir}/mktexlsr.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/mktexlsr ]; then
-	N=`cat /var/run/mktexlsr`
+	N=\`cat /var/run/mktexlsr\`
 	N=\`expr \$N + 1\`
     else
 	N=1
@@ -132,7 +132,7 @@ cat > %{buildroot}%{_sbindir}/mtxrun.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/mtxrun ]; then
-	N=`cat /var/run/mtxrun`
+	N=\`cat /var/run/mtxrun\`
 	N=\`expr \$N + 1\`
     else
 	N=1
@@ -168,7 +168,7 @@ cat > %{buildroot}%{_sbindir}/fmtutil.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/fmtutil ]; then
-	N=`cat /var/run/fmtutil`
+	N=\`cat /var/run/fmtutil\`
 	N=\`expr \$N + 1\`
     else
 	N=1
@@ -213,7 +213,7 @@ cat > %{buildroot}%{_sbindir}/updmap.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/updmap ]; then
-	N=`cat /var/run/updmap`
+	N=\`cat /var/run/updmap\`
 	N=\`expr \$N + 1\`
     else
 	N=1
@@ -258,7 +258,7 @@ cat > %{buildroot}%{_sbindir}/language.dat.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/language.dat ]; then
-	N=`cat /var/run/language.dat`
+	N=\`cat /var/run/language.dat\`
 	N=\`expr \$N + 1\`
     else
 	N=1
@@ -302,7 +302,7 @@ cat > %{buildroot}%{_sbindir}/language.def.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/language.def ]; then
-	N=`cat /var/run/language.def`
+	N=\`cat /var/run/language.def\`
 	N=\`expr \$N + 1\`
     else
 	N=1
@@ -350,7 +350,7 @@ cat > %{buildroot}%{_sbindir}/language.lua.pre << EOF
 (
     flock -n 9 || exit 1
     if [ -f /var/run/language.lua ]; then
-	N=`cat /var/run/language.lua`
+	N=\`cat /var/run/language.lua\`
 	N=\`expr \$N + 1\`
     else
 	N=1
