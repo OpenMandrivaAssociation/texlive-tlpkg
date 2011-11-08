@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111108
-Release:	1
+Release:	2
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -38,15 +38,9 @@ Source1:	http://mirrors.ctan.org/systems/texlive/tlnet/tlpkg/texlive.tlpdb.xz
 Source2:	tlpobj2spec.pl
 Source3:	fmtutil-hdr.cnf
 Source4:	updmap-hdr.cfg
-Source5:	checkupdates.pl
+Source5:	texlive.post
+Source6:	checkupdates.pl
 BuildArch:	noarch
-
-%pre
-    # should be a noop unless there was an iterrupted/failed install/remove
-    rm -f /var/run/mtxrun{,.lock}
-    rm -f /var/run/updmap{,.lock}
-    rm -f /var/run/fmtutil{,.lock}
-    rm -f /var/run/language.{dat,def,lua}{,.lock}
 
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
@@ -71,11 +65,8 @@ free software, including support for many languages around the world.
 %dir %{_texmf_language_def_d}
 %dir %{_texmf_language_lua_d}
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
-%{_sbindir}/mktexlsr.*
-%{_sbindir}/mtxrun.*
-%{_sbindir}/fmtutil.*
-%{_sbindir}/updmap.*
-%{_sbindir}/language.*
+%{_sbindir}/*.pre
+%{_sbindir}/*.post
 %{_sbindir}/tlpobj2spec
 %{_sys_macros_dir}/texlive.macros
 %doc %{_tlpkgdir}/texlive.tlpdb
@@ -98,303 +89,63 @@ mkdir -p %{buildroot}%{_texmf_language_lua_d}
 
 #-----------------------------------------------------------------------
 mkdir -p %{buildroot}%{_sbindir}
-cat > %{buildroot}%{_sbindir}/mktexlsr.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/mktexlsr ]; then
-	N=\`cat /var/run/mktexlsr\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/mktexlsr
-) 9>/var/run/mktexlsr.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/mktexlsr.pre
 
+#-----------------------------------------------------------------------
 cat > %{buildroot}%{_sbindir}/mktexlsr.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/mktexlsr ]; then
-	N=\`cat /var/run/mktexlsr\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	/usr/bin/mktexlsr %{_texmfdir} %{_texmfdistdir} > /dev/null
-	rm -f /var/run/mktexlsr
-    else
-	echo \$N > /var/run/mktexlsr
-    fi
-) 9>/var/run/mktexlsr.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/mktexlsr.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/mtxrun.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/mtxrun ]; then
-	N=\`cat /var/run/mtxrun\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/mtxrun
-) 9>/var/run/mtxrun.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/mtxrun.pre
-
 cat > %{buildroot}%{_sbindir}/mtxrun.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/mtxrun ]; then
-	N=\`cat /var/run/mtxrun\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	/usr/bin/mtxrun --generate > /dev/null
-	rm -f /var/run/mtxrun
-    else
-	echo \$N > /var/run/mtxrun
-    fi
-) 9>/var/run/mtxrun.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/mtxrun.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/fmtutil.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/fmtutil ]; then
-	N=\`cat /var/run/fmtutil\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/fmtutil
-) 9>/var/run/fmtutil.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/fmtutil.pre
-
 cat > %{buildroot}%{_sbindir}/fmtutil.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/fmtutil ]; then
-	N=\`cat /var/run/fmtutil\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	(
-	    cat %{_texmfdir}/web2c/fmtutil-hdr.cnf
-	    for file in \`find %{_texmf_fmtutil_d}/ -type f\`; do
-		cat \$file
-	    done
-	    if [ -f %{_texmflocaldir}/web2c/fmtutil-local.cnf ]; then
-		cat %{_texmflocaldir}/web2c/fmtutil-local.cnf
-	    fi
-	) > %{_texmfdir}/web2c/fmtutil.cnf
-	/usr/bin/fmtutil-sys --all > /dev/null
-	rm -f /var/run/fmtutil
-    else
-	echo \$N > /var/run/fmtutil
-    fi
-) 9>/var/run/fmtutil.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/fmtutil.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/updmap.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/updmap ]; then
-	N=\`cat /var/run/updmap\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/updmap
-) 9>/var/run/updmap.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/updmap.pre
-
 cat > %{buildroot}%{_sbindir}/updmap.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/updmap ]; then
-	N=\`cat /var/run/updmap\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	(
-	    cat %{_texmfdir}/web2c/updmap-hdr.cfg
-	    for file in \`find %{_texmf_updmap_d}/ -type f\`; do
-		cat \$file
-	    done
-	    if [ -f %{_texmflocaldir}/web2c/updmap-local.cfg ]; then
-		cat %{_texmflocaldir}/web2c/updmap-local.cfg
-	    fi
-	) > %{_texmfconfdir}/web2c/updmap.cfg
-	/usr/bin/updmap-sys --syncwithtrees > /dev/null
-	rm -f /var/run/updmap
-    else
-	echo \$N > /var/run/updmap
-    fi
-) 9>/var/run/updmap.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/updmap.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/language.dat.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/language.dat ]; then
-	N=\`cat /var/run/language.dat\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/language.dat
-) 9>/var/run/language.dat.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/language.dat.pre
-
 cat > %{buildroot}%{_sbindir}/language.dat.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/language.dat ]; then
-	N=\`cat /var/run/language.dat\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	(
-	    cat %{_texmfdir}/tex/generic/config/language.us
-	    for file in \`find %{_texmf_language_dat_d}/ -type f\`; do
-		cat \$file
-	    done
-	    if [ -f %{_texmflocaldir}/tex/generic/config/language-local.dat ]; then
-		cat %{_texmflocaldir}/tex/generic/config/language-local.dat
-	    fi
-	) > %{_texmfdir}/tex/generic/config/language.dat
-	rm -f /var/run/language.dat
-    else
-	echo \$N > /var/run/language.dat
-    fi
-) 9>/var/run/language.dat.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/language.dat.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/language.def.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/language.def ]; then
-	N=\`cat /var/run/language.def\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/language.def
-) 9>/var/run/language.def.lock
-rm /var/run/language.def.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/language.def.pre
-
 cat > %{buildroot}%{_sbindir}/language.def.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/language.def ]; then
-	N=\`cat /var/run/language.def\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	(
-	    cat %{_texmfdir}/tex/generic/config/language.us.def
-	    for file in \`find %{_texmf_language_def_d}/ -type f\`; do
-		cat \$file
-	    done
-	    if [ -f %{_texmflocaldir}/tex/generic/config/language-local.def ]; then
-		cat %{_texmflocaldir}/tex/generic/config/language-local.def
-	    fi
-	    echo "%%%%%% No changes may be made beyond this point."
-	    echo ""
-	    echo "\\uselanguage {USenglish}             %%%%%% This MUST be the last line of the file"
-	) > %{_texmfdir}/tex/generic/config/language.def
-	rm -f /var/run/language.def
-    else
-	echo \$N > /var/run/language.def
-    fi
-) 9>/var/run/language.def.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/language.def.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/language.lua.pre << EOF
-#!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/language.lua ]; then
-	N=\`cat /var/run/language.lua\`
-	N=\`expr \$N + 1\`
-    else
-	N=1
-    fi
-    echo \$N > /var/run/language.lua
-) 9>/var/run/language.lua.lock
-EOF
-chmod +x %{buildroot}%{_sbindir}/language.lua.pre
-
 cat > %{buildroot}%{_sbindir}/language.lua.post << EOF
 #!/bin/sh
-(
-    flock -n 9 || exit 1
-    if [ -f /var/run/language.lua ]; then
-	N=\`cat /var/run/language.lua\`
-	N=\`expr \$N - 1\`
-    else
-	N=0
-    fi
-    if [ \$N -lt 1 ]; then
-	(
-	    cat %{_texmfdir}/tex/generic/config/language.us.lua
-	    for file in \`find %{_texmf_language_lua_d}/ -type f\`; do
-		cat \$file
-	    done
-	    if [ -f %{_texmflocaldir}/tex/generic/config/language-local.dat.lua ]; then
-		cat %{_texmflocaldir}/tex/generic/config/language-local.dat.lua
-	    fi
-	    echo "}"
-	) > %{_texmfdir}/tex/generic/config/language.dat.lua
-	rm -f /var/run/language.lua
-    else
-	echo \$N > /var/run/language.lua
-    fi
-) 9>/var/run/language.lua.lock
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/language.lua.post
+
+#-----------------------------------------------------------------------
+pushd %{buildroot}%{_sbindir}
+    for script in mktexlsr mtxrun fmtutil updmap language.dat language.def language.lua
+    do
+	ln -sf $script.post $script.pre
+    done
+popd
 
 #-----------------------------------------------------------------------
 xz -d < %{SOURCE1} > %{buildroot}%{_tlpkgdir}/texlive.tlpdb
@@ -402,6 +153,7 @@ install -m755 %{SOURCE2} %{buildroot}%{_sbindir}/tlpobj2spec
 install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
+install -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
 
 mkdir -p %{buildroot}%{_sys_macros_dir}
 cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
