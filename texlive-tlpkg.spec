@@ -42,11 +42,6 @@ Source5:	texlive.post
 Source6:	checkupdates.pl
 BuildArch:	noarch
 
-Obsoletes:	texlive-doc <= 20110705-3
-Obsoletes:	texlive-fontsextra <= 20110705-3
-Obsoletes:	texlive-source <= 20110705-3
-Obsoletes:	texlive-texmf <= 20110705-3
-
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
 	cp -f %{_texmfdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
