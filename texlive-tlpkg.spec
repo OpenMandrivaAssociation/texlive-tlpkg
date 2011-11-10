@@ -27,8 +27,8 @@
 %define _texmf_with_system_teckit	0
 
 Name:		texlive-tlpkg
-Version:	20111108
-Release:	4
+Version:	20111109
+Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -41,6 +41,15 @@ Source4:	updmap-hdr.cfg
 Source5:	texlive.post
 Source6:	checkupdates.pl
 BuildArch:	noarch
+
+Conflicts:	texlive-source <= 20110705-3
+Obsoletes:	texlive-source <= 20110705-3
+Conflicts:	texlive-fontsextra <= 20110705-3
+Obsoletes:	texlive-fontsextra <= 20110705-3
+Conflicts:	texlive-doc <= 20110705-3
+Obsoletes:	texlive-doc <= 20110705-3
+Conflicts:	texlive-texmf <= 20110705-3
+Obsoletes:	texlive-texmf <= 20110705-3
 
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
