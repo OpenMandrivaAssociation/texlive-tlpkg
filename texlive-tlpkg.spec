@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111109
-Release:	3
+Release:	4
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -42,14 +42,11 @@ Source5:	texlive.post
 Source6:	checkupdates.pl
 BuildArch:	noarch
 
-Conflicts:	texlive-source <= 20110705-3
-Obsoletes:	texlive-source <= 20110705-3
-Conflicts:	texlive-fontsextra <= 20110705-3
-Obsoletes:	texlive-fontsextra <= 20110705-3
-Conflicts:	texlive-doc <= 20110705-3
-Obsoletes:	texlive-doc <= 20110705-3
-Conflicts:	texlive-texmf <= 20110705-3
-Obsoletes:	texlive-texmf <= 20110705-3
+Conflicts:	texlive <= 0:20110705-6:2012.0
+Conflicts:	texlive-source <= 0:20110705-3:2012.0
+Conflicts:	texlive-fontsextra <= 0:20110705-3:2012.0
+Conflicts:	texlive-doc <= 0:20110705-3:2012.0
+Conflicts:	texlive-texmf <= 0:20110705-3:2012.0
 
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
