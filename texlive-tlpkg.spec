@@ -27,8 +27,8 @@
 %define _texmf_with_system_teckit	0
 
 Name:		texlive-tlpkg
-Version:	20111109
-Release:	4
+Version:	20111122
+Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -40,6 +40,7 @@ Source3:	fmtutil-hdr.cnf
 Source4:	updmap-hdr.cfg
 Source5:	texlive.post
 Source6:	checkupdates.pl
+Source7:	texlive.macros
 BuildArch:	noarch
 
 Conflicts:	texlive <= 0:20110705-6:2012.0
@@ -160,47 +161,4 @@ install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
-
-mkdir -p %{buildroot}%{_sys_macros_dir}
-cat > %{buildroot}%{_sys_macros_dir}/texlive.macros <<EOF
-%%_tlpkgdir                      %{_tlpkgdir}
-%%_tlpkgobjdir			 %{_tlpkgobjdir}
-%%_texmfdir                      %{_texmfdir}
-%%_texmfdistdir                  %{_texmfdistdir}
-%%_texmflocaldir                 %{_texmflocaldir}
-%%_texmfextradir                 %{_texmfextradir}
-%%_texmffontsdir                 %{_texmffontsdir}
-%%_texmfprojectdir               %{_texmfprojectdir}
-%%_texmfvardir                   %{_texmfvardir}
-%%_texmfconfdir                  %{_texmfconfdir}
-%%_texmf_fmtutil_d               %{_texmf_fmtutil_d}
-%%_texmf_updmap_d                %{_texmf_updmap_d}
-%%_texmf_language_dat_d          %{_texmf_language_dat_d}
-%%_texmf_language_def_d          %{_texmf_language_def_d}
-%%_texmf_language_lua_d          %{_texmf_language_lua_d}
-
-%%_texmf_enable_asymptote        %{_texmf_enable_asymptote}
-%%_texmf_enable_xindy            %{_texmf_enable_xindy}
-%%_texmf_with_system_dialog      %{_texmf_with_system_dialog}
-%%_texmf_with_system_lcdf        %{_texmf_with_system_lcdf}
-%%_texmf_with_system_poppler     %{_texmf_with_system_poppler}
-%%_texmf_with_system_psutils     %{_texmf_with_system_psutils}
-%%_texmf_with_system_t1lib       %{_texmf_with_system_t1lib}
-%%_texmf_with_system_tex4ht      %{_texmf_with_system_tex4ht}
-%%_texmf_with_system_teckit      %{_texmf_with_system_teckit}
-
-%%_texmf_mktexlsr_pre            %{_sbindir}/mktexlsr.pre
-%%_texmf_mktexlsr_post           %{_sbindir}/mktexlsr.post
-%%_texmf_mtxrun_pre              %{_sbindir}/mtxrun.pre
-%%_texmf_mtxrun_post             %{_sbindir}/mtxrun.post
-%%_texmf_fmtutil_pre             %{_sbindir}/fmtutil.pre
-%%_texmf_fmtutil_post            %{_sbindir}/fmtutil.post
-%%_texmf_updmap_pre              %{_sbindir}/updmap.pre
-%%_texmf_updmap_post             %{_sbindir}/updmap.post
-%%_texmf_language_dat_pre        %{_sbindir}/language.dat.pre
-%%_texmf_language_dat_post       %{_sbindir}/language.dat.post
-%%_texmf_language_def_pre        %{_sbindir}/language.def.pre
-%%_texmf_language_def_post       %{_sbindir}/language.def.post
-%%_texmf_language_lua_pre        %{_sbindir}/language.lua.pre
-%%_texmf_language_lua_post       %{_sbindir}/language.lua.post
-EOF
+install -D -m644 %{SOURCE7} %{buildroot}%{_sys_macros_dir}/texlive.macros
