@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111122
-Release:	1
+Release:	2
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -42,6 +42,10 @@ Source5:	texlive.post
 Source6:	checkupdates.pl
 Source7:	texlive.macros
 BuildArch:	noarch
+
+Requires(pre):	perl-Proc-Daemon
+Requires(pre):	perl-Proc-PID-File
+Requires(pre):	perl-XML-XPath
 
 Conflicts:	texlive <= 0:20110705-6:2012.0
 Conflicts:	texlive-source <= 0:20110705-3:2012.0
