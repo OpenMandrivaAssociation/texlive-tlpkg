@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111122
-Release:	2
+Release:	3
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -102,59 +102,25 @@ mkdir -p %{buildroot}%{_texmf_language_lua_d}
 mkdir -p %{buildroot}%{_sbindir}
 
 #-----------------------------------------------------------------------
+cat > %{buildroot}%{_sbindir}/mktexlsr.pre << EOF
+#!/bin/sh
+exec %{_bindir}/perl %{_sbindir}/texlive.post +
+EOF
+chmod +x %{buildroot}%{_sbindir}/mktexlsr.pre
+
+#-----------------------------------------------------------------------
 cat > %{buildroot}%{_sbindir}/mktexlsr.post << EOF
 #!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
+exec %{_bindir}/perl %{_sbindir}/texlive.post -
 EOF
 chmod +x %{buildroot}%{_sbindir}/mktexlsr.post
 
 #-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/mtxrun.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/mtxrun.post
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/fmtutil.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/fmtutil.post
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/updmap.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/updmap.post
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/language.dat.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/language.dat.post
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/language.def.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/language.def.post
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/language.lua.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/language.lua.post
-
-#-----------------------------------------------------------------------
 pushd %{buildroot}%{_sbindir}
-    for script in mktexlsr mtxrun fmtutil updmap language.dat language.def language.lua
+    for script in mtxrun fmtutil updmap language.dat language.def language.lua
     do
-	ln -sf $script.post $script.pre
+	ln -sf mktexlsr.pre $script.pre
+	ln -sf mktexlsr.post $script.post
     done
 popd
 
