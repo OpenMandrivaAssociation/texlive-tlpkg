@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111122
-Release:	3
+Release:	4
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -104,14 +104,14 @@ mkdir -p %{buildroot}%{_sbindir}
 #-----------------------------------------------------------------------
 cat > %{buildroot}%{_sbindir}/mktexlsr.pre << EOF
 #!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post +
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/mktexlsr.pre
 
 #-----------------------------------------------------------------------
 cat > %{buildroot}%{_sbindir}/mktexlsr.post << EOF
 #!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post -
+exec %{_bindir}/perl %{_sbindir}/texlive.post
 EOF
 chmod +x %{buildroot}%{_sbindir}/mktexlsr.post
 
