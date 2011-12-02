@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111122
-Release:	5
+Release:	6
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -79,7 +79,7 @@ free software, including support for many languages around the world.
 %{_sbindir}/*.pre
 %{_sbindir}/*.post
 %{_sbindir}/tlpobj2spec
-%{_sys_macros_dir}/texlive.macros
+/etc/rpm/macros.d/texlive.macros
 %doc %{_tlpkgdir}/texlive.tlpdb
 
 #-----------------------------------------------------------------------
@@ -131,4 +131,4 @@ install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
-install -D -m644 %{SOURCE7} %{buildroot}%{_sys_macros_dir}/texlive.macros
+install -D -m644 %{SOURCE7} %{buildroot}/etc/rpm/macros.d/texlive.macros
