@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20111122
-Release:	6
+Release:	7
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -43,15 +43,17 @@ Source6:	checkupdates.pl
 Source7:	texlive.macros
 BuildArch:	noarch
 
-Requires(pre):	perl-Proc-Daemon
-Requires(pre):	perl-Proc-PID-File
-Requires(pre):	perl-XML-XPath
+Requires:	perl-Proc-Daemon
+Requires:	perl-Proc-PID-File
+Requires:	perl-XML-XPath
 
-Conflicts:	texlive <= 0:20110705-6:2012.0
-Conflicts:	texlive-source <= 0:20110705-3:2012.0
-Conflicts:	texlive-fontsextra <= 0:20110705-3:2012.0
-Conflicts:	texlive-doc <= 0:20110705-3:2012.0
-Conflicts:	texlive-texmf <= 0:20110705-3:2012.0
+Conflicts:	texlive < 0:20110705-7
+Obsoletes:	texlive < 0:20110705-7
+Conflicts:	texlive-source < 0:20110705-4
+Conflicts:	texlive-fontsextra < 0:20110705-4
+Conflicts:	texlive-doc < 0:20110705-4
+Conflicts:	texlive-texmf < 0:20110705-4
+Obsoletes:	texlive-texmf < 0:20110705-4
 
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
@@ -66,7 +68,7 @@ free software, including support for many languages around the world.
 
 %files
 %dir %{_tlpkgdir}
-%{_tlpkgdir}/TeXLive
+%{_tlpkgdir}/TeXLive/
 %{_texmfdir}/web2c/fmtutil-hdr.cnf
 %{_texmfdir}/web2c/updmap-hdr.cfg
 %dir %{_tlpkgobjdir}
@@ -79,7 +81,7 @@ free software, including support for many languages around the world.
 %{_sbindir}/*.pre
 %{_sbindir}/*.post
 %{_sbindir}/tlpobj2spec
-/etc/rpm/macros.d/texlive.macros
+%{_sysconfdir}/rpm/macros.d/texlive.macros
 %doc %{_tlpkgdir}/texlive.tlpdb
 
 #-----------------------------------------------------------------------
