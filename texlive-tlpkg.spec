@@ -80,9 +80,7 @@ free software, including support for many languages around the world.
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
 %{_sbindir}/*.pre
 %{_sbindir}/*.post
-%{_sbindir}/tlpobj2spec
 %{_sysconfdir}/rpm/macros.d/texlive.macros
-%doc %{_tlpkgdir}/texlive.tlpdb
 
 #-----------------------------------------------------------------------
 %prep
@@ -127,8 +125,6 @@ pushd %{buildroot}%{_sbindir}
 popd
 
 #-----------------------------------------------------------------------
-xz -d < %{SOURCE1} > %{buildroot}%{_tlpkgdir}/texlive.tlpdb
-install -m755 %{SOURCE2} %{buildroot}%{_sbindir}/tlpobj2spec
 install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
