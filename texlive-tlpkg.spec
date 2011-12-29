@@ -47,14 +47,6 @@ Requires:	perl-Proc-Daemon
 Requires:	perl-Proc-PID-File
 Requires:	perl-XML-XPath
 
-Conflicts:	texlive < 0:20110705-7
-Obsoletes:	texlive < 0:20110705-7
-Conflicts:	texlive-source < 0:20110705-4
-Conflicts:	texlive-fontsextra < 0:20110705-4
-Conflicts:	texlive-doc < 0:20110705-4
-Conflicts:	texlive-texmf < 0:20110705-4
-Obsoletes:	texlive-texmf < 0:20110705-4
-
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
 	cp -f %{_texmfdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
