@@ -1,8 +1,6 @@
-%define _use_internal_dependency_generator	0
-%define _requires_exceptions			perl(Text::Unidecode)\\|perl(Tie::Watch)\\|perl(SelfLoader)
+%define __noautoreq			'perl\\(Text::Unidecode\\)|perl\\(Tie::Watch\\)|perl\\(SelfLoader\\)'
 
 %define _tlpkgdir			%{_datadir}/tlpkg
-%define _tlpkgobjdir			%{_tlpkgdir}/tlpobj
 %define _texmfdir			%{_datadir}/texmf
 %define _texmfdistdir			%{_datadir}/texmf-dist
 %define _texmflocaldir			%{_datadir}/texmf-local
@@ -29,7 +27,7 @@
 
 Name:		texlive-tlpkg
 Version:	20120109
-Release:	3
+Release:	4
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -42,6 +40,7 @@ Source4:	updmap-hdr.cfg
 Source5:	texlive.post
 Source6:	checkupdates.pl
 Source7:	texlive.macros
+Source8:	tlmgr
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -64,16 +63,18 @@ free software, including support for many languages around the world.
 %{_tlpkgdir}/TeXLive/
 %{_texmfdir}/web2c/fmtutil-hdr.cnf
 %{_texmfdir}/web2c/updmap-hdr.cfg
-%dir %{_tlpkgobjdir}
 %dir %{_texmf_fmtutil_d}
 %dir %{_texmf_updmap_d}
 %dir %{_texmf_language_dat_d}
 %dir %{_texmf_language_def_d}
 %dir %{_texmf_language_lua_d}
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
-%{_sbindir}/*.pre
-%{_sbindir}/*.post
+%{_bindir}/tlmgr
+%{_sbindir}/tlmgr
+%{_sbindir}/texlive.post
 %{_sysconfdir}/rpm/macros.d/texlive.macros
+%{_sysconfdir}/pam.d/tlmgr
+%{_sysconfdir}/console.apps/tlmgr
 
 #-----------------------------------------------------------------------
 %prep
@@ -82,7 +83,7 @@ free software, including support for many languages around the world.
 %build
 
 %install
-mkdir -p %{buildroot}%{_tlpkgobjdir}
+mkdir -p %{buildroot}%{_tlpkgdir}
 cp -fpr tlpkg/TeXLive %{buildroot}%{_tlpkgdir}
 
 mkdir -p %{buildroot}%{_texmf_fmtutil_d}
@@ -91,35 +92,22 @@ mkdir -p %{buildroot}%{_texmf_language_dat_d}
 mkdir -p %{buildroot}%{_texmf_language_def_d}
 mkdir -p %{buildroot}%{_texmf_language_lua_d}
 
-#-----------------------------------------------------------------------
-mkdir -p %{buildroot}%{_sbindir}
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/mktexlsr.pre << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/mktexlsr.pre
-
-#-----------------------------------------------------------------------
-cat > %{buildroot}%{_sbindir}/mktexlsr.post << EOF
-#!/bin/sh
-exec %{_bindir}/perl %{_sbindir}/texlive.post
-EOF
-chmod +x %{buildroot}%{_sbindir}/mktexlsr.post
-
-#-----------------------------------------------------------------------
-pushd %{buildroot}%{_sbindir}
-    for script in mtxrun fmtutil updmap language.dat language.def language.lua
-    do
-	ln -sf mktexlsr.pre $script.pre
-	ln -sf mktexlsr.post $script.post
-    done
-popd
-
-#-----------------------------------------------------------------------
 install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
-install -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
+install -D -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
 install -D -m644 %{SOURCE7} %{buildroot}/etc/rpm/macros.d/texlive.macros
+
+# install tlmgr like application
+install -D -m755 %{SOURCE8} %{buildroot}%{_sbindir}/tlmgr
+mkdir -p %{buildroot}%{_sysconfdir}/pam.d
+ln -sf %{_sysconfdir}/pam.d/mandriva-simple-auth %{buildroot}%{_sysconfdir}/pam.d/tlmgr
+mkdir -p %{buildroot}%{_sysconfdir}/console.apps
+cat > %{buildroot}%{_sysconfdir}/console.apps/tlmgr << EOF
+USER=root
+PROGRAM=%{_sbindir}/tlmgr
+FALLBACK=false
+SESSION=true
+EOF
+mkdir -p %{buildroot}%{_bindir}
+ln -sf %{_bindir}/consolehelper %{buildroot}%{_bindir}/tlmgr
