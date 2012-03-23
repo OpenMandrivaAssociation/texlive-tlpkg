@@ -27,7 +27,7 @@
 
 Name:		texlive-tlpkg
 Version:	20120109
-Release:	4
+Release:	5
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -51,6 +51,7 @@ Requires:	perl-XML-XPath
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
 	cp -f %{_texmfdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
     fi
+    %{_sbindir}/texlive.post
 
 %description
 TeX Live is an easy way to get up and running with the TeX document
