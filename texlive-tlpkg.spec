@@ -19,15 +19,15 @@
 %define _texmf_enable_xindy		0
 %define _texmf_with_system_dialog	1
 %define _texmf_with_system_lcdf		0
-%define _texmf_with_system_poppler	0
+%define _texmf_with_system_poppler	1
 %define _texmf_with_system_psutils	1
 %define _texmf_with_system_t1lib	1
 %define _texmf_with_system_tex4ht	0
 %define _texmf_with_system_teckit	0
 
 Name:		texlive-tlpkg
-Version:	20120109
-Release:	5
+Version:	20120411
+Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
