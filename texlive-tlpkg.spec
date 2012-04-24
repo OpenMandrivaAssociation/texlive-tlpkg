@@ -16,6 +16,7 @@
 %define _texmf_language_lua_d		%{_datadir}/tlpkg/language.lua.d
 
 %define _texmf_enable_asymptote		0
+%define _texmf_enable_biber		0
 %define _texmf_enable_xindy		0
 %define _texmf_with_system_dialog	1
 %define _texmf_with_system_lcdf		0
