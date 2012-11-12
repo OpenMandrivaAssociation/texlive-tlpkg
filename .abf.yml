@@ -1,0 +1,10 @@
+sources:
+  "checkupdates.pl:"	052b2af50b516f91d74b4171bf54b11de930c2ea
+  "fmtutil-hdr.cnf:"	77b2fd6239fb19dbf3bbf959b80922473718a887
+  "install-tl-unx.tar.gz:"	8ee07f3dce94b36df51c5dc0adf27e799437db11
+  "texlive.macros:"	d3b48e642798d43282a3c31cb3fb0fea7ea7827d
+  "texlive.post:"	17a1dfaaeedc25015a1b846c897ddea536413c9c
+  "texlive.tlpdb.xz:"	6ad950e9a5f3e71f1655c121559289ce3c1a3ee0
+  "tlmgr:"	2337857ace4c8bfc83c9f30aef2bb848c138c2c2
+  "tlpobj2spec.pl:"	3322005fc2df10c94401d417d889c7f18d1f2365
+  "updmap-hdr.cfg:"	8ec215408f0e5238bff4eb956d2e0294e5170e39
