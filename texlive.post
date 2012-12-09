@@ -1,0 +1,176 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Proc::Daemon;
+use Proc::PID::File;
+
+use Sys::Syslog qw( :DEFAULT setlogsock);
+use IPC::Open3;
+use File::Spec;
+use Symbol qw(gensym);
+
+my $data;
+my $run = "/var/run/texlive.run";
+my $ctl = "/var/run/texlive.ctl";
+
+if (Proc::Daemon::Init()) {
+    if ($#ARGV >= 0 && $ARGV[0] eq "-") {
+	open(my $fd, ">$ctl");
+	close($fd);
+	my $count = 0;
+	while (-f $ctl && $count < 10) {
+	    sleep(10);
+	    ++$count;
+	}
+    }
+    exit(0);
+}
+elsif (Proc::PID::File->running()) {
+    open(my $fd, ">$run");
+    close($fd);
+    exit(0);
+}
+
+openlog('texlive.post', '', '');
+syslog('info', "starting update");
+
+sub shell {
+    my ($command) = @_;
+    syslog('info', $command);
+    open(NULL, ">", File::Spec->devnull);
+    my $pid = open3(gensym, ">&NULL", \*PH,
+		    "/usr/bin/timeout", "-k", "360", "360",
+		    "/bin/sh", "-c", $command);
+    while(<PH>) {
+	foreach (split('\n', $_)) {
+	    syslog('err', $_);
+	}
+    }
+    waitpid($pid, 0);
+    close(NULL);
+};
+
+$/= undef;
+while (1) {
+    while (1) {
+	sleep(15);
+	if (-f $run) {
+	    unlink($run);
+	    next;
+	}
+	else {
+	    last;
+	}
+    }
+
+    # if finishing uninstall or timeout too early
+    unless (-x "/usr/bin/mktexlsr") {
+	last;
+    }
+
+    if (open(IN, "</usr/share/texmf/web2c/fmtutil-hdr.cnf")) {
+	open(OUT, ">/usr/share/texmf/web2c/fmtutil.cnf");
+	$data = <IN>;
+	close(IN);
+	print(OUT $data);
+	foreach my $fmt (glob("/usr/share/tlpkg/fmtutil.cnf.d/*")) {
+	    open(IN, $fmt);
+	    $data = <IN>;
+	    close(IN);
+	    print(OUT $data);
+	}
+	if (-f "/usr/share/texmf-local/web2c/fmtutil-local.cnf") {
+	    open(IN, "/usr/share/texmf-local/web2c/fmtutil-local.cnf");
+	    $data = <IN>;
+	    print(OUT $data);
+	}
+	close(OUT);
+    }
+    if (open(IN, "</usr/share/texmf/web2c/updmap-hdr.cfg")) {
+	open(OUT, ">/usr/share/texmf/web2c/updmap.cfg");
+	open(OUT2, ">/etc/texmf/web2c/updmap.cfg");
+	$data = <IN>;
+	close(IN);
+	print(OUT $data);
+	print(OUT2 $data);
+	foreach my $upd (glob("/usr/share/tlpkg/updmap.cfg.d/*")) {
+	    open(IN, $upd);
+	    $data = <IN>;
+	    close(IN);
+	    print(OUT $data);
+	    print(OUT2 $data);
+	}
+	if (-f "/usr/share/texmf-local/web2c/updmap-local.cfg") {
+	    open(IN, "/usr/share/texmf-local/web2c/updmap-local.cfg");
+	    $data = <IN>;
+	    print(OUT $data);
+	    print(OUT2 $data);
+	}
+	close(OUT);
+	close(OUT2);
+    }
+    if (open(IN, "</usr/share/texmf/tex/generic/config/language.us")) {
+	open(OUT, ">/usr/share/texmf/tex/generic/config/language.dat");
+	$data = <IN>;
+	close(IN);
+	print(OUT $data);
+	foreach my $dat (glob("/usr/share/tlpkg/language.dat.d/*")) {
+	    open(IN, $dat);
+	    $data = <IN>;
+	    close(IN);
+	    print(OUT $data);
+	}
+	if (-f "/usr/share/texmf-local/tex/generic/config/language-local.dat") {
+	    open(IN, "/usr/share/texmf-local/tex/generic/config/language-local.dat");
+	    $data = <IN>;
+	    print(OUT $data);
+	}
+	close(OUT);
+    }
+    if (open(IN, "</usr/share/texmf/tex/generic/config/language.us.def")) {
+	open(OUT, ">/usr/share/texmf/tex/generic/config/language.def");
+	$data = <IN>;
+	close(IN);
+	print(OUT $data);
+	foreach my $dat (glob("/usr/share/tlpkg/language.def.d/*")) {
+	    open(IN, $dat);
+	    $data = <IN>;
+	    close(IN);
+	    print(OUT $data);
+	}
+	if (-f "/usr/share/texmf-local/tex/generic/config/language-local.def") {
+	    open(IN, "/usr/share/texmf-local/tex/generic/config/language-local.def");
+	    $data = <IN>;
+	    print(OUT $data);
+	}
+	print(OUT
+	      "%%% No changes may be made beyond this point.\n\n",
+	      "\uselanguage {USenglish} 	    %%% This MUST be the last line of the file\n");
+	close(OUT);
+    }
+
+    # regenerate ls-R
+    shell("/usr/bin/mktexlsr");
+
+    # run binaries/scripts
+    if (-x "/usr/bin/updmap-sys") {
+	shell("/usr/bin/updmap-sys --syncwithtrees");
+    }
+    if (-x "/usr/bin/mtxrun") {
+	shell("/usr/bin/mtxrun --generate");
+    }
+    if (-x "/usr/bin/fmtutil-sys") {
+	shell("/usr/bin/fmtutil-sys --all") 
+    }
+
+    if (-f $run) {
+	unlink($run);
+    }
+    else {
+	last;
+    }
+}
+if (-f $ctl) {
+    unlink($ctl);
+}
+syslog('info', "finishing update");

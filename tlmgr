@@ -1,0 +1,1242 @@
+#!/usr/bin/perl
+
+# based on texlive.infra tlmgr.pl and tlmgrgui.pl and Mandriva URPM/urpm tools.
+
+# License of code adapted to be used here:
+
+#-----------------------------------------------------------------------
+
+# Copyright 2008, 2009, 2010, 2011 Norbert Preining
+# This file is licensed under the GNU General Public License version 2
+# or any later version.
+
+#-----------------------------------------------------------------------
+
+
+# avoid warnings in urpm code, at least about "%todo == ()"
+#$^W = 1;
+
+use strict;
+
+use lib('tlpkg', '/usr/share/tlpkg');
+use TeXLive::TLUtils;
+use TeXLive::TLConfig;
+use TeXLive::TLPaper;
+
+use urpm;
+use urpm::args;
+use urpm::msg;
+use urpm::util;
+use urpm::media;
+use urpm::select;
+use urpm::get_pkgs;
+use urpm::xml_info;
+use urpm::xml_info_pkg;
+use urpm::main_loop;
+
+use Tk;
+use Tk::Dialog;
+use Tk::Adjuster;
+use Tk::BrowseEntry;
+use Tk::ROText;
+use Tk::HList;
+use Tk::ItemStyle;
+use Pod::Text;
+
+########################################################################
+my $urpm = urpm->new();
+my $urpm_lock;
+my $rpm_lock;
+my $update_ready = 0;
+
+my %Packages;
+my $mw;
+my $menu;
+my $menu_file;
+my $menu_options;
+my $menu_help;
+my @p_ii = qw/-padx 2m -pady 2m/;
+my @p_iii= qw/-padx 3m -pady 3m/;
+my @x_x = qw/-expand 1 -fill x/;
+my @x_y = qw/-expand 1 -fill y/;
+my @x_xy= qw/-expand 1 -fill both/;
+my @left = qw/-side left/;
+my @right= qw/-side right/;
+my @bot  = qw/-side bottom/;
+my @a_w = qw/-anchor w/;
+my @a_c = qw/-anchor c/;
+my @htype = qw/-relief ridge/;
+
+my $g;          # the scrolled list of packages
+my $lighttext;
+my $darktext;
+my $match_entry;
+
+my $status_all = 0;
+my $status_only_installed = 1;
+my $status_only_not_installed = 2;
+my $status_only_updated = 3;
+my $status_value = 0;
+my $show_packages = 1;
+my $show_collections = 1;
+my $show_schemes = 1;
+my $match_descriptions = 0;
+my $match_filenames = 0;
+my $selection_value = 0;
+
+########################################################################
+if ($>) {
+    exec('consolehelper', 'perl', $0, @ARGV);
+}
+
+my %papers;
+my %currentpaper;
+my %changedpaper;
+my %init_paper_subs;
+$init_paper_subs{"xdvi"} = \&init_paper_xdvi;
+$init_paper_subs{"pdftex"} = \&init_paper_pdftex;
+$init_paper_subs{"dvips"} = \&init_paper_dvips;
+$init_paper_subs{"context"} = \&init_paper_context;
+$init_paper_subs{"dvipdfm"} = \&init_paper_dvipdfm;
+$init_paper_subs{"dvipdfmx"} = \&init_paper_dvipdfmx;
+
+guimain();
+
+########################################################################
+sub guimain {
+    build_initial_gui();
+    init_hooks();
+
+    $urpm->{'log'} = \&update_status_box_newline;
+    $urpm->{'print'} = \&update_status_box_newline;
+
+    $urpm_lock = urpm::lock::urpmi_db($urpm, '', wait => 1);
+
+    urpm::media::read_config($urpm, 'nocheck');
+    urpm::media::update_those_media($urpm, \@{$urpm->{'media'}}, undef,
+				    quiet => 1,
+				    all => 1,
+				    callback => \&urpm::download::sync_logger);
+
+    # auto configure/initialize urpmi
+    urpm::media::configure($urpm);
+
+    init_db(1);
+
+    if (check_on_writable()) {
+	$::we_can_save = 1;
+    } else {
+	$::we_can_save = 0;
+	# here we should pop up a warning window!!!
+    }
+    $::action_button_state = ($::we_can_save ? "normal" : "disabled");
+
+    setup_menu_system();
+
+    do_rest_of_gui();
+    setup_list();
+    update_grid();
+
+    $update_ready = 1;
+
+    print("Completed" . ".\n");
+    $mw->deiconify;
+
+    Tk::MainLoop();
+};
+
+########################################################################
+sub build_initial_gui {
+    $mw = MainWindow->new;
+    $mw->title(N("TeX Live URPMI Manager"));
+    $mw->withdraw;
+
+    print(N("Loading local TeX Live Database") . "\n" .
+	  N("This may take some time, please wait!") . "\n");
+
+    #
+    # default layout definitions
+    #
+    # priority 20 = widgetDefault 
+    # see Mastering Perl/Tk, 16.2. Using the Option Database
+    $mw->optionAdd("*Button.Relief", "ridge", 20);
+    #
+    # does not work, makes all buttons exactely 10, which is not a good idea
+    # I would like to have something like MinWidth 10...
+    #$mw->optionAdd("*Button.Width", "10", 20);
+
+    # create a progress bar window
+    $::progressw = $mw->Scrolled("ROText", -scrollbars => "e", -height => 8);
+    $::progressw->pack(-fill => "x", @bot);
+};
+
+########################################################################
+sub setup_menu_system {
+    $menu = $mw->Menu();
+    $menu_file = $menu->Menu();
+    $menu_options = $menu->Menu();
+    $menu_help = $menu->Menu();
+    $menu->add('cascade', -label => "tlmgr", -menu => $menu_file);
+    $menu->add('cascade', -label => N("Options"), -menu => $menu_options);
+    $menu->add('cascade', -label => N("Help"), -menu => $menu_help);
+
+    $menu_file->add('command',
+		    -label => N("Quit"),
+		    -command => sub { $mw->destroy; exit(0); });
+
+    $menu_options->add('command',
+		       -label => N("Paper ..."),
+		       -command => sub { do_paper_settings(); });
+
+    $menu_help->add('command',
+		    -label => N("About"),
+		    -command => sub
+		    {
+			my $sw = $mw->DialogBox(-title => N("About"),
+						-buttons => [ N("Ok") ]);
+			$sw->add("Label",
+				 -text => "TeX Live URPMI Manager
+
+Based on tlmgr
+Copyright 2008, 2009, 2010, 2011 Norbert Preining
+
+Licensed under the GNU General Public License version 2 or higher.
+"
+				 )->pack(@p_iii);
+			$sw->Show;
+		    });
+
+    $mw->configure(-menu => $menu);
+};
+
+########################################################################
+sub do_rest_of_gui {
+    my $gf = $mw->Frame;
+
+    my $list_frame = $gf->Frame;
+    $g = $list_frame->Scrolled('HList',
+			       -scrollbars => "se",
+			       -bd => 0,
+			       -command => \&show_extended_info,
+			       -columns => 5,
+			       -header => 1,
+			       -borderwidth => 1,
+			       -separator => "/",
+			       -selectmode => "none");
+
+    my $button_frame = $mw->Frame;
+
+    my $top_frame = $gf->Labelframe(-text => N("Display configuration"));
+
+    my $filter_frame = $top_frame->Frame();
+    $filter_frame->pack(-expand => 1, -fill => 'both');
+
+    my $filter_status = $filter_frame->Labelframe(-text => N("Status"));
+    $filter_status->pack(@left, @x_y, @p_ii);
+
+    $filter_status->Radiobutton(-text => N("all"),
+				-command => \&update_grid,
+				-variable => \$status_value,
+				-value => $status_all)
+    ->pack(@a_w);
+    $filter_status->Radiobutton(-text => N("installed"),
+				-command => \&update_grid,
+				-variable => \$status_value,
+				-value => $status_only_installed)
+    ->pack(@a_w);
+    $filter_status->Radiobutton(-text => N("not installed"),
+				-command => \&update_grid,
+				-variable => \$status_value,
+				-value => $status_only_not_installed)
+    ->pack(@a_w);
+    $filter_status->Radiobutton(-text => N("updates"),
+				-command => \&update_grid,
+				-variable => \$status_value,
+				-value => $status_only_updated)
+    ->pack(@a_w);
+
+    my $filter_category = $filter_frame->Labelframe(-text => N("Category"));
+    $filter_category->pack(@left, @x_y, @p_ii);
+    $filter_category->Checkbutton(-text => N("packages"),
+				  -command => \&update_grid,
+				  -variable => \$show_packages)
+    ->pack(@a_w);
+    $filter_category->Checkbutton(-text => N("collections"),
+				  -command => \&update_grid,
+				  -variable => \$show_collections)
+    ->pack(@a_w);
+    $filter_category->Checkbutton(-text => N("schemes"),
+				  -command => \&update_grid,
+				  -variable => \$show_schemes)
+    ->pack(@a_w);
+
+    my $filter_match = $filter_frame->Labelframe(-text => N("Match"));
+    $filter_match->pack(@left, @x_y, @p_ii);
+    $match_entry = 
+    $filter_match->Entry(-width => 15,
+			 -validate => 'key')
+    ->pack(@a_w,
+	   -padx => '2m',
+	   @x_x);
+    $filter_match->Checkbutton(-text => N("descriptions"),
+			       -command => \&update_grid,
+			       -variable => \$match_descriptions)
+    ->pack(@a_w);
+    $filter_match->Checkbutton(-text => N("filenames"),
+			       -command => \&update_grid,
+			       -variable => \$match_filenames)
+    ->pack(@a_w);
+
+    $match_entry->configure(-validate => 'key',
+			    -validatecommand =>
+			    sub { 
+				my ($new_val, undef, $old_val) = @_;
+				if (!$new_val) {
+				    $match_descriptions = 0;
+				    $match_filenames = 0;
+				} else {
+				    # if something is already in the search field don't change selection
+				    if (!$old_val) {
+					$match_descriptions = 1;
+					$match_filenames = 1;
+				    }
+				}
+				update_grid(); return 1;
+			    });
+
+    my $filter_selection = $filter_frame->Labelframe(-text => N("Selection"));
+    $filter_selection->pack(@left, @x_y, @p_ii);
+    $filter_selection->Radiobutton(-text => N("all"),
+				   -command => \&update_grid,
+				   -variable => \$selection_value,
+				   -value => 0)
+    ->pack(@a_w);
+    $filter_selection->Radiobutton(-text => N("selected"),
+				   -command => \&update_grid,
+				   -variable => \$selection_value,
+				   -value => 1)
+    ->pack(@a_w);
+    $filter_selection->Radiobutton(-text => N("not selected"),
+				   -command => \&update_grid,
+				   -variable => \$selection_value,
+				   -value => 2)
+    ->pack(@a_w);
+
+    my $filter_button = $filter_frame->Frame;
+    $filter_button->pack(@left, @x_y, @p_ii);
+    $filter_button->Button(-text => N("Select all"),
+			   -command => [ \&update_grid, 1 ])
+    ->pack(@x_x, @a_c);
+    $filter_button->Button(-text => N("Select none"),
+			   -command => [ \&update_grid, 0 ])
+    ->pack(@x_x, @a_c);
+
+    $filter_button->Button(-text => N("Reset filters"),
+			   -command =>
+			   sub { $status_value = $status_all;
+			       $show_packages = 1; $show_collections = 1; 
+			       $show_schemes = 1;
+			       $selection_value = 0;
+			       $match_descriptions = 0;
+			       $match_filenames = 0;
+			       update_grid();
+			   })
+    ->pack(@x_x, @a_c);
+
+    ########## Packages #######################
+    $g->pack(qw/-expand 1 -fill both -padx 3 -pady 3/);
+    $g->focus;
+
+    $lighttext = $g->ItemStyle('text',
+			       -background => 'gray90',
+			       -selectbackground => 'gray90',
+			       -selectforeground => 'blue');
+    $darktext = $g->ItemStyle('text',
+			      -background => 'gray70',
+			      -selectbackground => 'gray70',
+			      -selectforeground => 'blue');
+
+    $g->headerCreate(0, @htype,
+		     -itemtype => 'text',
+		     -text => "");
+    $g->headerCreate(1, @htype,
+		     -itemtype => 'text',
+		     -text => N("Package name"));
+    $g->headerCreate(2, @htype,
+		     -itemtype => 'text',
+		     -text => N("Local"));
+    $g->headerCreate(3, @htype,
+		     -itemtype => 'text',
+		     -text => N("Remote"));
+    $g->headerCreate(4, @htype,
+		     -itemtype => 'text',
+		     -text => N("Description"));
+
+    $g->columnWidth(0, 40);
+    $g->columnWidth(2, -char => 20);
+    $g->columnWidth(3, -char => 20);
+
+    my $bot_frame = $gf->Frame;
+
+    my $actions_frame = $bot_frame->Frame;
+    $actions_frame->pack();
+
+    my $with_all_frame = $actions_frame->Frame;
+    $with_all_frame->pack(@left, -padx => '5m');
+    $with_all_frame->Button(-text => N("Update all installed"),
+			    -state => $::action_button_state,
+			    -command =>
+			    sub { update_all_packages(); }
+			    )->pack(@p_ii);
+
+    my $with_sel_frame = $actions_frame->Frame;
+    $with_sel_frame->pack(@left, -padx => '5m');
+
+    $with_sel_frame->Button(-text => N("Install / Update"),
+			    -state => $::action_button_state,
+			    -command => sub { install_selected_packages(); }
+			    )
+    ->pack(@left, @p_ii);
+    $with_sel_frame->Button(-text => N("Remove"),
+			    -state => $::action_button_state,
+			    -command => sub { remove_selected_packages(); }
+			    )
+    ->pack(@left, @p_ii);
+
+    $button_frame->pack(-expand => 0, -fill => 'x', @p_ii);
+    $top_frame->pack(-fill => 'x', -padx => '2m');
+    $bot_frame->pack(-fill => 'x', @p_ii, -side => 'bottom');
+    $list_frame->pack(@x_xy, @p_ii);
+
+    $mw->Adjuster(-widget => $::progressw, -side => 'bottom')
+    ->pack(-side => 'bottom', -fill => 'x');
+
+    $gf->pack(-side => 'top', -fill => 'both', -expand => 1);
+}
+
+########################################################################
+sub show_extended_info {
+    my $p = shift;
+    $g->selectionClear;
+    $g->anchorClear;
+    my $sw = $mw->Toplevel(-title => N("Details on:") . $p, @p_ii);
+    $sw->transient($mw);
+
+    our $tf = $sw->Frame;
+    my $bf = $sw->Frame;
+    $tf->pack;
+    $bf->pack(-pady => '3m');
+
+    sub add_info {
+	my ($label, $text, $height) = @_;
+	my $lbl = $tf->Label(-text => $label);
+	my $txt = $tf->ROText(-height => $height,
+			      -width => 70,
+			      -wrap => 'none',
+			      -relief => 'flat');
+	$txt->insert("1.0", $text);
+	$lbl->grid($txt, -sticky => "nw");
+    };
+
+    add_info(N("Package:"), $p, 1);
+    add_info(N("Summary:"), $Packages{$p}{'summary'}, 1);
+    if ($Packages{$p}{'description'}) {
+	add_info(N("Description:"), $Packages{$p}{'description'}, 4);
+    }
+    if ($Packages{$p}{'local'}) {
+	add_info(N("Local version:"), $Packages{$p}{'local'}, 1);
+    }
+    if ($Packages{$p}{'remote'}) {
+	add_info(N("Remote version:"), $Packages{$p}{'remote'}, 1);
+    }
+    if ($Packages{$p}{'files'}) {
+	add_info(N("Files:"), $Packages{$p}{'files'}, 5);
+    }
+
+    $bf->Button(-text => N("Ok"),
+		-width => 10,
+		-command => sub { $sw->destroy;	})
+    ->pack;
+}
+
+########################################################################
+sub update_grid {
+    # select code
+    # if not given just do nothing
+    # if == 1 select all packages that will be shown
+    # if == 0 deselect all packages that will be shown
+    my $selectcode = shift;
+
+    my @schemes;
+    my @colls;
+    my @packs;
+    for my $p (sort keys %Packages) {
+	if ($Packages{$p}{'category'} eq 'Scheme') {
+	    push @schemes, $p;
+	}
+	elsif ($Packages{$p}{'category'} eq 'Collection') {
+	    push @colls, $p;
+	}
+	else {
+	    push @packs, $p;
+	}
+    }
+    $g->delete('all');
+    my $i = 0;
+    my @displist;
+    @displist = (@schemes, @colls, @packs);
+    for my $p (@displist) {
+	if (MatchesFilters($p)) {
+	    if (defined($selectcode)) {
+		$Packages{$p}{'selected'} = $selectcode;
+	    }
+	    $g->add($p);
+	    my $st = ($i % 2 ? $lighttext : $darktext);
+	    $g->itemCreate($p, 0,
+			   -itemtype => 'window', 
+			   -widget => $Packages{$p}{'cb'});
+	    $Packages{$p}{'cb'}
+	    ->configure(-background => ($i % 2 ? 'gray90' : 'gray70'));
+	    $g->itemCreate($p, 1,
+			   -itemtype => 'text',
+			   -style => $st, 
+			   -text => $Packages{$p}{'displayname'});
+	    $g->itemCreate($p, 2,
+			   -itemtype => 'text',
+			   -style => $st,
+			   -text => $Packages{$p}{'local'});
+	    $g->itemCreate($p, 3,
+			   -itemtype => 'text',
+			   -style => $st,
+			   -text => $Packages{$p}{'remote'});
+	    $g->itemCreate($p, 4, -itemtype => 'text',
+			   -style => $st,
+			   -text => $Packages{$p}{'summary'});
+	    $i++;
+	}
+    }
+};
+
+########################################################################
+sub MatchesFilters {
+    my $p = shift;
+    if ($status_value == $status_all ||
+	($status_value == $status_only_installed &&
+	 $Packages{$p}{'installed'} == 1) ||
+	($status_value == $status_only_not_installed &&
+	 $Packages{$p}{'installed'} == 0) ||
+	($status_value == $status_only_updated &&
+	 $Packages{$p}{'local'} ne "" &&
+	 $Packages{$p}{'remote'} ne "" &&
+	 $Packages{$p}{'local'} ne $Packages{$p}{'remote'})) {
+	# more checks
+    }
+    else {
+	return 0;
+    }
+    # category
+    if (($show_packages    && ($Packages{$p}{'category'} eq 'Other')) ||
+	($show_collections && ($Packages{$p}{'category'} eq 'Collection')) ||
+	($show_schemes     && ($Packages{$p}{'category'} eq 'Scheme')) ) {
+	# more checks
+    }
+    else {
+	return 0;
+    }
+
+    if ($match_descriptions || $match_filenames) {
+	my $found = 0;
+	my $r = $match_entry->get;
+	if ($r eq "") {
+	    return 0;
+	}
+	if ($match_descriptions) {
+	    if ($Packages{$p}{'summary'} =~ m/$r/i) {
+	        $found = 1;
+	    }
+	}
+	if (!$found) {
+	    if ($match_filenames) {
+	        if ($Packages{$p}{'files'} &&
+		    grep(/$r/i, $Packages{$p}{'files'})) {
+		    $found = 1;
+	        }
+	    }
+	}
+	if (!$found) {
+	    return 0;
+	}
+    }
+
+    # selection
+    if ($selection_value == 0) {
+	# all -> maybe more checks
+    }
+    elsif ($selection_value == 1) {
+	# only selected
+	if ($Packages{$p}{'selected'}) {
+	    # do nothing, maybe more checks
+	}
+	else {
+	    # not selected package and only selected packages shown
+	    return 0;
+	}
+    }
+    else {
+	# only not selected
+	if ($Packages{$p}{'selected'}) {
+	    # selected, but only not selected should be shown
+	    return 0;
+	} # else do nothing
+    }
+    return 1;
+};
+
+########################################################################
+sub setup_list {
+    foreach my $name (keys %Packages) {
+	$Packages{$name}{'selected'} = 0;
+	$Packages{$name}{'cb'} = $g->
+	Checkbutton(-variable => \$Packages{$name}{'selected'})
+	unless defined($Packages{$name}{'cb'});
+    }
+};
+
+########################################################################
+sub update_status_box_newline {
+    update_status(join("\n", @_) . "\n");
+    $mw->update if ($update_ready);
+}
+
+sub update_status_box {
+    update_status(join("\n", @_));
+    $mw->update if ($update_ready);
+}
+
+sub init_hooks {
+  push @::info_hook, \&update_status_box;
+  push @::warn_hook, \&update_status_box;
+  push @::debug_hook, \&update_status_box;
+  push @::ddebug_hook, \&update_status_box;
+  push @::dddebug_hook, \&update_status_box;
+}
+
+sub update_status {
+    my ($p) = @_;
+    $::progressw->insert("end", "$p");
+    $::progressw->see("end");
+}
+
+########################################################################
+sub callback {
+    my ($p, $files, $descr) = @_;
+    if ($p) {
+	$p->fullname =~ m/texlive-(.*)-(.*)-(.*)-.*\.([^.]+)$/;
+	my ($name, $version, $release, $arch) = ($1, $2, $3, $4);
+	if ($name) {
+	    if (($files and $descr) or !defined($Packages{$name})) {
+		$Packages{$name} = {
+		    'displayname'	=>	$name,
+		    'version'		=>	$version,
+		    'release'		=>	$release,
+		    'arch'		=>	$arch,
+		    'summary'		=>	$p->summary,
+		};
+		if ($name =~ /^scheme-/) {
+		    $Packages{$name}{'category'} = 'Scheme';
+		}
+		elsif ($name =~ /^collection-/) {
+		    $Packages{$name}{'category'} = 'Collection';
+		}
+		else {
+		    $Packages{$name}{'category'} = 'Other';
+		}
+	    }
+	    if ($files and $descr) {
+		if (!defined($Packages{$name}{'local'})) {
+		    $Packages{$name}{'local'} = "";
+		}
+		$Packages{$name}{'files'} = $files->{'files'};
+		$Packages{$name}{'description'} = $descr->{'description'};
+		$Packages{$name}{'remote'} = "$version-$release";
+		if (!defined($Packages{$name}{'installed'})) {
+		    $Packages{$name}{'installed'} = 0;
+		}
+	    }
+	    else {
+		if (!defined($Packages{$name}{'remote'})) {
+		    $Packages{$name}{'remote'} = "";
+		}
+		if (!defined($Packages{$name}{'files'})) {
+		    $Packages{$name}{'files'} = $p->files();
+		}
+		if (!defined($Packages{$name}{'description'})) {
+		    $Packages{$name}{'description'} = $p->description();
+		}
+		$Packages{$name}{'local'} = "$version-$release";
+		$Packages{$name}{'installed'} = 1;
+	    }
+	}
+    }
+};
+
+########################################################################
+sub init_db() {
+    my ($locked) = @_;
+    my %requested;
+    my @names = ("texlive-");
+
+    if (!$locked) {
+	$urpm_lock = urpm::lock::urpmi_db($urpm, '', wait => 1);
+    }
+
+    # select all /^texlive-/ packages
+    urpm::select::search_packages($urpm,
+				  \%requested, \@names,
+				  use_provides => 1,
+				  fuzzy => 1,
+				  caseinsensitive => 1,
+				  no_substring => 0,
+				  all => 1);
+    # some magic to list remote description and files
+    my ($unused, $list) =
+	urpm::get_pkgs::selected2local_and_blists($urpm, \%requested);
+    my $files_xml = urpm::media::any_xml_info($urpm, @$list[0]->{'medium'},
+					      'files');
+    my $descr_xml = urpm::media::any_xml_info($urpm, @$list[0]->{'medium'},
+					      'info');
+    my @pkgs;
+    foreach (keys %requested) {
+	push(@pkgs, $urpm->{depslist}[$_]);
+    }
+
+    my %files = urpm::xml_info::get_nodes('files', $files_xml,
+					  [map { scalar $_->fullname } @pkgs]);
+    my %descr = urpm::xml_info::get_nodes('info', $descr_xml,
+					  [map { scalar $_->fullname } @pkgs]);
+
+    # load remote packages information
+    foreach (keys %requested) {
+	callback($urpm->{depslist}[$_],
+		 $files{$urpm->{depslist}[$_]->fullname},
+		 $descr{$urpm->{depslist}[$_]->fullname});
+    }
+    $urpm_lock->unlock;
+
+    $rpm_lock = urpm::lock::rpm_db($urpm, 'exclusive', wait => 1);
+
+    # load local packages information
+    my $db = urpm::db_open_or_die_($urpm);
+    $db->traverse(sub { my ($p) = @_; callback($p); });
+
+    $rpm_lock->unlock;
+};
+
+########################################################################
+sub check_on_writable {
+    return !$>;
+};
+
+########################################################################
+sub SelectedPackages {
+    my @pkgs;
+    for my $pkg (keys %Packages) {
+	next if !$Packages{$pkg}{'selected'};
+	if (MatchesFilters($pkg)) {
+	    push(@pkgs, "texlive-$pkg");
+	}
+    }
+    return @pkgs;
+}
+
+########################################################################
+sub update_all_packages {
+    foreach my $p (keys %Packages) {
+	if ($Packages{$p}{'local'} ne "" &&
+	    $Packages{$p}{'remote'} ne "" &&
+	    $Packages{$p}{'local'} ne $Packages{$p}{'remote'}) {
+	    $Packages{$p}{'selected'} = 1;
+	}
+	else {
+	    $Packages{$p}{'selected'} = 0;
+	}
+    }
+    install_selected_packages();
+};
+
+########################################################################
+sub install_selected_packages {
+    my %requested;
+    my @pkgs = SelectedPackages();
+    return unless (@pkgs);
+
+    urpm::select::search_packages($urpm,
+				  \%requested, \@pkgs,
+				  use_provides => 1,
+				  fuzzy => 0,
+				  caseinsensitive => 0,
+				  no_substring => 0,
+				  all => 1);
+
+    my $state = {};
+    urpm::select::resolve_dependencies($urpm,
+				       $state,
+				       \%requested);
+    my @list = @{$urpm->{depslist}}[sort { $a <=> $b } keys %{$state->{selected}}];
+    $urpm->{nb_install} = @list;
+
+    my $msg0 = $urpm->{nb_install} == 1 ?
+    N("To satisfy dependencies, the following package is going to be installed:") :
+    N("To satisfy dependencies, the following packages are going to be installed:");
+
+    my ($size, $filesize) = $urpm->selected_size_filesize($state);
+
+    my @format = urpm::msg::format_line_selected_packages($urpm,
+							  $state, \@list);
+    my $msg1 = $size >= 0 ? 
+    N("%s of additional disk space will be used.", formatXiB($size)) :
+    N("%s of disk space will be freed.", formatXiB(-$size));
+
+    my $msg2 = $filesize ?
+    N("%s of packages will be retrieved.", formatXiB($filesize)) : "";
+    $msg2 .= $urpm->{nb_install} == 1 ?
+    N("Proceed with the installation of one package?") :
+    N("Proceed with the installation of the %d packages?", $urpm->{nb_install});
+
+    my $message = join("\n", $msg0, @format, $msg1, $msg2);
+
+    my $choice = ask_yes_no($message);
+    if ($choice eq "Yes") {
+	$urpm_lock = urpm::lock::urpmi_db($urpm, '', wait => 1);
+
+	urpm::main_loop::run($urpm, $state, 
+			     int(@list),
+			     undef, \%requested,
+	{
+	    trans_log => sub {
+		my ($mode, $file, $percent, $total,
+		    $eta, $speed) = @_;
+		if ($mode eq 'start') {
+		    update_status_box_newline("    $file");
+		}
+		elsif ($mode eq 'progress') {
+		    my $text = &urpm::download::progress_text;
+		    update_status_box_newline($text);
+		}
+		elsif ($mode eq 'error') {
+		    update_status_box_newline(N("...retrieving failed: %s",
+						$percent));
+		}
+	    },
+	    inst => \&install_logger,
+	    trans => \&install_logger,
+	    bad_signature => sub {
+		# do not provide interface to force install
+		my ($msg, $msg2) = @_;
+		update_status_box_newline($msg);
+		0;
+	    },
+	    trans_error_summary => sub {
+		my ($_nok, $errors) = @_;
+		update_status_box_newline(@$errors);
+	    },
+	    ask_yes_or_no => sub {
+		my ($_title, $msg) = @_;
+		$choice = ask_yes_no($msg);
+		$choice eq "Yes";
+	    },
+	    need_restart => sub {
+		my ($need_restart_formatted) = @_;
+		update_status_box_newline("$_")
+		foreach values %$need_restart_formatted;
+	    },
+	    message => sub {
+		my ($title, $msg) = @_;
+		update_status_box_newline($msg);
+	    },
+	});
+
+	$urpm_lock->unlock;
+
+	init_db();
+	setup_list();
+	update_grid();
+	$urpm->{logger_count} = 0;
+    }
+};
+
+########################################################################
+sub remove_selected_packages {
+    my $save_status = $status_value;
+    $status_value = $status_only_installed;
+    my @pkgs = SelectedPackages();
+    $status_value = $save_status;
+    return unless (@pkgs);
+
+    my $state = {};
+
+    my @list;
+    @list = urpm::select::find_packages_to_remove(
+						  $urpm,
+						  $state,
+						  \@pkgs,
+						  use_provides => 1,
+						  fuzzy => 0,
+						  caseinsensitive => 0,
+						  no_substring => 0,
+						  all => 1,
+	callback_notfound => sub {
+	    my $urpm = shift @_;
+	    #- Warning : the following message is parsed in urpm::parallel_*
+	    $urpm->{fatal}(1, (@_ > 1 ? N("unknown packages") :
+			       N("unknown package")) . ': ' . join(', ', @_)); 
+	    0;
+	},
+	callback_fuzzy => sub {
+	    my $urpm = shift @_;
+	    my $match = shift @_;
+	    my $pkgs = $urpm::msg::no_translation ? join(' ', @_) : join('', map { "\n$_" } sort @_);
+	    #- Warning : the following message is parsed in urpm::parallel_*
+	    $urpm->{fatal}(1, N("The following packages contain %s: %s",
+				$match, $pkgs)); 
+	    0;
+	},
+	callback_base => sub {
+	    my ($urpm, @l) = @_;
+	    #- Warning : the following message is parsed in urpm::parallel_*
+	    $urpm->{fatal}(1,
+			   P("Removing the following package will break your system:",
+			     "Removing the following packages will break your system:",
+			     int(@l)) . "\n" .
+			   add_leading_spaces(urpm::select::translate_why_removed($urpm, $state, @l)));
+	    0;
+	},
+    ) or $urpm->{fatal}(0, N("Nothing to remove"));
+
+    my $message = scalar(@pkgs) == 1 ?
+    N("To satisfy dependencies, the following package will be removed") :
+    N("To satisfy dependencies, the following %d packages will be removed",
+      scalar(@pkgs));
+    $message .=
+    sprintf(" (%s)", formatXiB(-$urpm->selected_size($state))) . ":\n" .
+    add_leading_spaces(join("\n", sort @list) . "\n");
+
+    my $choice = ask_yes_no($message);
+    if ($choice eq "Yes") {
+	$urpm_lock = urpm::lock::urpmi_db($urpm, '', wait => 1);
+	urpm::install::install($urpm, \@pkgs, {}, {},
+			       callback_inst => \&install_logger,
+			       callback_trans => \&install_logger);
+	$urpm_lock->unlock;
+
+	init_db();
+	setup_list();
+	update_grid();
+	$urpm->{logger_count} = 0;
+    }
+};
+
+########################################################################
+sub install_logger {
+    my ($urpm, $type, $id, $subtype, $amount, $total) = @_;
+    my $pkg = defined $id && $urpm->{depslist}[$id];
+    my $total_pkg = $urpm->{nb_install};
+    local $| = 1;
+
+    if ($subtype eq 'start') {
+	$urpm->{logger_progress} = 0;
+	if ($type eq 'trans') {
+	    $urpm->{logger_count} ||= 0;
+	    my $p = N("Preparing...");
+	    $p .= " " x (33 - length($p));
+	    update_status_box($p);
+	}
+	else {
+	    my $pname = $pkg ? $pkg->name : '';
+	    ++$urpm->{logger_count} if $pname;
+	    my $cnt = $pname ? $urpm->{logger_count} : '-';
+	    $pname ||= N("[repackaging]");
+	    my $s = sprintf("%9s: %-22s", $cnt . "/" . $total_pkg, $pname);
+	    unless ($s =~ / $/) {
+		$s .= sprintf("\n%9s  %-22s", '', '');
+	    }
+	    update_status_box($s);
+	}
+    }
+    elsif ($subtype eq 'stop') {
+	if ($urpm->{logger_progress} < 45) {
+	    $urpm->{print}('#' x (45 - $urpm->{logger_progress}));
+	    $urpm->{logger_progress} = 0;
+	}
+    }
+    elsif ($subtype eq 'progress') {
+	my $new_progress = $total > 0 ? int(45 * $amount / $total) : 45;
+	if ($new_progress > $urpm->{logger_progress}) {
+	    update_status_box('#' x ($new_progress - $urpm->{logger_progress}));
+	    $urpm->{logger_progress} = $new_progress;
+	    $urpm->{logger_progress} == 45 and update_status_box_newline("");
+	}
+    }
+};
+
+########################################################################
+sub ask_yes_no {
+    my ($message) = @_;
+
+    my $sw = $mw->Toplevel(-title => N("Information"), @p_ii);
+    $sw->transient($mw);
+
+    my $text = $sw->Scrolled('ROText',
+			     -scrollbars => "e",
+			     -height => 12);
+    $text->insert("1.0", "$message");
+    $text->pack(-fill => "x", qw/-expand 1 -side top -fill both/);
+
+    # default value
+    $sw->{'choice'} = "No";
+    $sw->protocol('WM_DELETE_WINDOW' => sub { $sw->{'No'}->invoke });
+
+    my $button_frame = $sw->Frame();
+    $button_frame->Button(-text => N("Yes"),
+			  -width => 10,
+			  -command => sub {
+			      $sw->{'choice'} = "Yes";
+			      })
+    ->pack(@left, @p_ii);
+    $sw->{'No'} = $button_frame->Button(-text => N("No"),
+					-width => 10,
+					-command => sub {
+					    $sw->{'choice'} = "No";
+					})
+    ->pack(@left, @p_ii);
+    $button_frame->pack();
+
+    # if window is destroyed during waitVariable
+    $sw->OnDestroy(sub { $sw->{'choice'} = $sw->{'choice'}; });
+
+    $sw->withdraw;
+    $sw->Popup;
+    $sw->SetFocusGrab($sw);
+    $sw->waitVariable(\$sw->{'choice'});
+    my $result = "No";
+    $result = $sw->{'choice'} if (defined($sw->{'choice'}));
+    $sw->RestoreFocusGrab($sw, 'withdraw');
+    $sw->destroy;
+
+    return $result;
+
+};
+
+########################################################################
+sub formatXiB {
+    my ($newnb, $o_newbase) = @_;
+    my $newbase = $o_newbase || 1;
+    my $sign = $newnb < 0 ? -1 : 1;
+    $newnb = abs(int($newnb));
+    my ($nb, $base);
+    my $decr = sub { 
+	($nb, $base) = ($newnb, $newbase);
+	$base >= 1024 ? ($newbase = $base / 1024) : ($newnb = $nb / 1024);
+    };
+    my $suffix;
+    foreach (N("B"), N("KB"), N("MB"), N("GB"), N("TB")) {
+	$decr->(); 
+	if ($newnb < 1 && $newnb * $newbase < 1) {
+	    $suffix = $_;
+	    last;
+	}
+    }
+    my $v = $nb * $base;
+    my $s = $v < 10 && int(10 * $v - 10 * int($v));
+    int($v) . ($s ? ".$s" : '') . ($suffix || N("TB"));
+}
+
+########################################################################
+sub add_leading_spaces {
+    my ($s) = @_;
+    $s =~ s/^/  /gm;
+    $s;
+}
+
+########################################################################
+sub init_paper_xdvi {
+    @{$papers{"xdvi"}} = TeXLive::TLPaper::get_paper_list("xdvi");
+    $currentpaper{"xdvi"} = ${$papers{"xdvi"}}[0];
+}
+
+sub init_paper_pdftex {
+    @{$papers{"pdftex"}} = TeXLive::TLPaper::get_paper_list("pdftex");
+    $currentpaper{"pdftex"} = ${$papers{"pdftex"}}[0];
+}
+
+sub init_paper_dvips {
+    @{$papers{"dvips"}} = TeXLive::TLPaper::get_paper_list("dvips");
+    $currentpaper{"dvips"} = ${$papers{"dvips"}}[0];
+}
+
+sub init_paper_dvipdfm {
+    @{$papers{"dvipdfm"}} = TeXLive::TLPaper::get_paper_list("dvipdfm");
+    $currentpaper{"dvipdfm"} = ${$papers{"dvipdfm"}}[0];
+}
+
+sub init_paper_context {
+    @{$papers{"context"}} = TeXLive::TLPaper::get_paper_list("context");
+    $currentpaper{"context"} = ${$papers{"context"}}[0];
+}
+
+sub init_paper_dvipdfmx {
+    @{$papers{"dvipdfmx"}} = TeXLive::TLPaper::get_paper_list("dvipdfmx");
+    $currentpaper{"dvipdfmx"} = ${$papers{"dvipdfmx"}}[0];
+}
+
+sub init_all_papers {
+    for my $p (keys %init_paper_subs) {
+	&{$init_paper_subs{$p}}();
+    }
+}
+
+sub do_paper_settings {
+    init_all_papers();
+    my $sw = $mw->Toplevel(-title => N("Paper options"));
+    $sw->transient($mw);
+    $sw->grab();
+
+    %changedpaper = %currentpaper;
+
+    my $lower = $sw->Frame;
+    $lower->pack(-fill => "both");
+
+    my $back_config_pap = $lower->Labelframe(-text => N("Paper options"));
+    my $back_config_buttons = $sw->Frame();
+
+    my $back_config_pap_l1 =
+    $back_config_pap->Label(-text => N("Default paper for all"),
+			    -anchor => "w");
+    my $back_config_pap_m1 =
+    $back_config_pap->Button(-text => N("a4"),
+			     -command => sub { change_paper("all", "a4"); });
+    my $back_config_pap_r1 =
+    $back_config_pap->Button(-text => N("letter"),
+			     -command => sub { change_paper("all", "letter"); });
+
+    $back_config_pap_l1->grid($back_config_pap_m1, $back_config_pap_r1,
+			      -padx => "2m",
+			      -pady => "2m",
+			      -sticky => "nswe");
+
+    my (%l,%m,%r);
+    foreach my $p (sort keys %papers) {
+	$l{$p} =
+	$back_config_pap->Label(-text => N("Default paper for") . " $p",
+				-anchor => "w");
+	$m{$p} = $back_config_pap->Label(-textvariable => \$changedpaper{$p},
+					 -anchor => "w");
+	$r{$p} = $back_config_pap->Button(-text => N("Change"),
+					  -command => sub { select_paper($sw,$p); },
+					  -anchor => "w");
+	$l{$p}->grid( $m{$p}, $r{$p},
+		     -padx => "2m", -pady => "2m", -sticky => "nsw");
+    }
+
+    $back_config_pap->pack(-side => 'left',
+			   -fill => "both",
+			   -padx => "2m",
+			   -pady => "2m");
+
+    $back_config_buttons->pack(-padx => "10m", -pady => "5m");
+    $back_config_buttons->Button(-text => N("Apply changes"), 
+				 -state => $::action_button_state,
+				 -command => sub { apply_paper_changes();
+				     $sw->destroy; })
+    ->pack(-side => 'left', -padx => "3m");
+    $back_config_buttons->Button(-text => N("Cancel"), 
+				 -command => sub { $sw->destroy; })
+    ->pack(-side => 'left', -padx => "3m");
+}
+
+sub apply_paper_changes {
+    $mw->Busy(-recurse => 1);
+    for my $k (keys %changedpaper) {
+	if ($currentpaper{$k} ne $changedpaper{$k}) {
+	    action_paper($k, "paper", $changedpaper{$k});
+	    `/usr/bin/mktexlsr /etc/texmf`;
+	    &{$init_paper_subs{$k}}();
+	}
+    }
+    $mw->Unbusy;
+}
+
+sub change_paper {
+    my ($prog, $pap) = @_;
+    if ($prog eq "all") {
+	for my $k (keys %changedpaper) {
+	    $changedpaper{$k} = $pap;
+	}
+    }
+    else {
+	$changedpaper{$prog} = $pap;
+    }
+}
+
+sub select_paper {
+    my $back_config = shift;
+    my $prog = shift;
+    my $foo =
+    $back_config->Toplevel(-title => N("Select paper format for") . " $prog");
+    $foo->transient($back_config);
+    $foo->grab();
+    my $var = $changedpaper{$prog};
+    my $opt = $foo->BrowseEntry(-label => N("Default paper for") . " $prog",
+				-variable => \$var);
+    foreach my $p (sort @{$papers{$prog}}) {
+	$opt->insert("end", $p);
+    }
+    $opt->pack(-padx => "2m", -pady => "2m");
+    my $f = $foo->Frame;
+    my $okbutton = $f->Button(-text => N("Ok"),
+			      -command => sub { change_paper($prog,$var);
+				  $foo->destroy; })
+    ->pack(-side => "left", -padx => "2m", -pady => "2m");
+    my $cancelbutton = $f->Button(-text => N("Cancel"),
+				  -command => sub { $foo->destroy; })
+    ->pack(-side => "left", -padx => "2m", -pady => "2m");
+    $f->pack;
+    $foo->bind('<Return>', [ $okbutton, 'Invoke' ]);
+    $foo->bind('<Escape>', [ $cancelbutton, 'Invoke' ]);
+}
+
+sub action_paper {
+    chomp(my $texmfsysconfig = `kpsewhich -var-value=TEXMFSYSCONFIG`);
+    $ENV{"TEXMFCONFIG"} = $texmfsysconfig;
+
+    my $action = shift @_;
+    if ($action =~ m/^paper$/i) {  # generic paper
+	my $newpaper = shift @_;
+	if (!defined($newpaper)) {  # tlmgr paper => show all current sizes.
+	    TeXLive::TLPaper::paper_all($texmfsysconfig,undef);
+	}
+	elsif ($newpaper !~ /^(a4|letter)$/) {  # tlmgr paper junk => complain.
+	    $newpaper = "the empty string" if !defined($newpaper);
+	    update_status_box("tlmgr: expected `a4' or `letter' after paper, not $newpaper\n");
+	}
+	else { # tlmgr paper {a4|letter} => do it.
+	    return if !check_on_writable();
+	    TeXLive::TLPaper::paper_all($texmfsysconfig,$newpaper);
+	}
+    }
+    else {  # program-specific paper
+	my $prog = $action;     # first argument is the program to change
+	my $arg = shift @_;  # get "paper" argument
+	if (!defined($arg) || $arg ne "paper") {
+	    $arg = "the empty string." if ! $arg;
+	    update_status_box("tlmgr: expected `paper' after $prog, not $arg\n");
+	    return;
+	}
+	# the do_paper progs check for the argument --list, so if given
+	# restore it to the cmd line.
+	if (@_) {
+	    return if !check_on_writable();
+	}
+	TeXLive::TLPaper::do_paper($prog,$texmfsysconfig,@_);
+    }
+}
