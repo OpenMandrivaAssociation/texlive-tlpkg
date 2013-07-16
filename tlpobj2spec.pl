@@ -13,6 +13,7 @@ $arch .= "-linux";
 
 # texlive => rpm
 my %Tags = (
+    'afm2pl'	=>	"%rename tetex-afm, %rename texlive-texmf-afm",
     'jadetex'	=>	"%rename jadetex",
     'kpathsea'	=>	"%rename kpathsea",
     'pdfjam'	=>	"%rename pdfjam",
@@ -64,6 +65,7 @@ my @block = (
 ########################################################################
 # quirks defs begin
 my %quirk_epoch = (
+    'amiri'					=>	1,
     'l3kernel'					=>	1,
     'l3packages'				=>	1,
     'gost'					=>	1,
@@ -153,7 +155,21 @@ my %quirk_epoch = (
     'collection-science'			=>	1,
     'collection-texinfo'			=>	1,
     'collection-xetex'				=>	1,
+    'endheads'					=>	1,
     'euro-ce'					=>	1,
+    'glossaries'				=>	1,
+    'lgrx'					=>	1,
+    'ltxkeys'					=>	1,
+    'nicefilelist'				=>	1,
+    'nlctdoc'					=>	1,
+    'patgen'					=>	1,
+    'pst-tools'					=>	1,
+    'regexpatch'				=>	1,
+    'sttools'					=>	1,
+    'texdirflatten'				=>	1,
+    'ucs'					=>	1,
+    'uptex'					=>	1,
+    'xetex'					=>	1,
 );
 my %quirk_prep = (
     'kpathsea'			=>	"\
@@ -168,9 +184,6 @@ perl -pi -e 's%^(TEXMFMAIN\\s+= ).*%\$1%{_texmfdir}%;'			  \\\
 	 -e 's%^(OSFONTDIR\\s+= ).*%\$1%{_datadir}/fonts%;'		  \\\
 	texmf/web2c/texmf.cnf
 ",
-    'tetex'			=>	"\
-perl -pi -e 's|\\\$TEXMFROOT/tlpkg|%{_datadir}/tlpkg|;'		\\\
-    texmf/scripts/tetex/updmap.pl\n",
     'luatex'			=>	"\
 perl -pi -e 's%^(\\s*TEXMFMAIN\\s+=\\s+\").*%\$1%{_texmfdir}\",%;'				\\\
 	 -e 's%\\bTEXMFCONTEXT\\b%TEXMFDIST%g;'						\\\
@@ -185,6 +198,12 @@ perl -pi -e 's%^(\\s*TEXMFMAIN\\s+=\\s+\").*%\$1%{_texmfdir}\",%;'				\\\
 	 -e 's|^local texmflocal.*\$||;'							\\\
 	 -e 's|^texmflocal.*\$||;'							\\\
 	texmf/web2c/texmfcnf.lua\n",
+    'texdoc'			=>	"\
+perl -pi -e 's%^# (viewer_pdf = )xpdf.*%\$1xdg-open%;'	\\\
+	texmf-dist/texdoc/texdoc.cnf\n",
+    'tetex'			=>	"\
+perl -pi -e 's|\\\$TEXMFROOT/tlpkg|%{_datadir}/tlpkg|;'		\\\
+    texmf/scripts/tetex/updmap.pl\n",
 );
 my %quirk_requires = (
     'cslatex'			=>	"Requires(post):	texlive-csplain\n",
@@ -195,25 +214,117 @@ Requires(post):	texlive-texconfig
 Requires(post):	texlive-pdftex.bin\n",
 );
 my %quirk_provides_bin = (
+    'a2ping'			=>	1,
+    'authorindex'		=>	1,
+    'bibexport'			=>	1,
+    'bundledoc'			=>	1,
+    'cachepic'			=>	1,
     'checkcites'		=>	1,
     'context'			=>	1,
+    'ctanify'			=>	1,
+    'ctanupload'		=>	1,
+    'de-macro'			=>	1,
+    'dosepsbin'			=>	1,
+    'dviasm'			=>	1,
+    'dvipdfm'			=>	1,
+    'ebong'			=>	1,
+    'epstopdf'			=>	1,
+    'exceltex'			=>	1,
+    'fig4latex'			=>	1,
     'findhyph'			=>	1,
+    'fontinst'			=>	1,
+    'fontools'			=>	1,
+    'fragmaster'		=>	1,
     'jfontmaps'			=>	1,
+    'glossaries'		=>	1,
+    'latex2man'			=>	1,
+    'latexmk'			=>	1,
+    'latexpand'			=>	1,
+    'listbib'			=>	1,
+    'lua2dox'			=>	1,
+    'luaotfload'		=>	1,
     'match_parens'		=>	1,
+    'mathspic'			=>	1,
+    'mf2pt1'			=>	1,
+    'mkgrkindex'		=>	1,
+    'mkjobtexmf'		=>	1,
     'mptopdf'			=>	1,
+    'pax'			=>	1,
     'pdfcrop'			=>	1,
+    'pedigree-perl'		=>	1,
+    'perltex'			=>	1,
+    'pkfix'			=>	1,
+    'purifyeps'			=>	1,
+    'splitindex'		=>	1,
+    'sty2dtx'			=>	1,
+    'svn-multi'			=>	1,
     'tetex'			=>	1,
+    'texdef'			=>	1,
+    'texconfig'			=>	1,
+    'texcount'			=>	1,
+    'texdiff'			=>	1,
+    'texdirflatten'		=>	1,
+    'texdoc'			=>	1,
     'texlive-scripts'		=>	1,
+    'texliveonfly'		=>	1,
+    'texloganalyser'		=>	1,
+    'thumbpdf'			=>	1,
+    'tpic2pdftex'		=>	1,
     'typeoutfileinfo'		=>	1,
+    'ulqda'			=>	1,
+    'urlbst'			=>	1,
+    'vpe'			=>	1,
 );
 my %quirk_bin_files = (
+    'a2ping'			=>	"%{_bindir}/a2ping\n",
+    'authorindex'		=>	"%{_bindir}/authorindex\n",
+    'bibexport'			=>	"%{_bindir}/bibexport\n",
+    'bundledoc'			=>	"%{_bindir}/arlatex\n%{_bindir}/bundledoc\n",
+    'cachepic'			=>	"%{_bindir}/cachepic\n",
     'checkcites'		=>	"%{_bindir}/checkcites\n",
+    'chktex'			=>	"%{_bindir}/chkweb\n%{_bindir}/deweb\n",
     'context'			=>	"%{_bindir}/*\n",
+    'ctanify'			=>	"%{_bindir}/ctanify\n",
+    'ctanupload'		=>	"%{_bindir}/ctanupload\n",
+    'de-macro'			=>	"%{_bindir}/de-macro\n",
+    'dosepsbin'			=>	"%{_bindir}/dosepsbin\n",
+    'dviasm'			=>	"%{_bindir}/dviasm\n",
+    'dvipdfm'			=>	"%{_bindir}/dvipdft\n",
+    'ebong'			=>	"%{_bindir}/ebong\n",
+    'epstopdf'			=>	"%{_bindir}/epstopdf\n%{_bindir}/repstopdf\n",
+    'exceltex'			=>	"%{_bindir}/exceltex\n",
+    'fig4latex'			=>	"%{_bindir}/fig4latex\n",
     'findhyph'			=>	"%{_bindir}/findhyph\n",
-    'jfontmaps'			=>	"%{_bindir}/updmap-setup-kanji\n",
+    'fontinst'			=>	"%{_bindir}/fontinst\n",
+    'fontools'			=>	"%{_bindir}/*\n",
+    'fragmaster'		=>	"%{_bindir}/fragmaster\n",
+    'glossaries'		=>	"%{_bindir}/makeglossaries\n",
+    'jfontmaps'			=>	"%{_bindir}/updmap-setup-kanji
+%{_bindir}/updmap-setup-kanji-sys\n",
+    'latex2man'			=>	"%{_bindir}/latex2man\n",
+    'latexmk'			=>	"%{_bindir}/latexmk\n",
+    'latexpand'			=>	"%{_bindir}/latexpand\n",
+    'listbib'			=>	"%{_bindir}/listbib\n",
+    'lua2dox'			=>	"%{_bindir}/lua2dox_filter\n%{_bindir}/lua2dox_lua\n",
+    'luaotfload'		=>	"%{_bindir}/mkluatexfontdb\n",
+    'm-tx'			=>	"%{_bindir}/m-tx\n",
     'match_parens'		=>	"%{_bindir}/match_parens\n",
+    'mathspic'			=>	"%{_bindir}/mathspic\n",
+    'mf2pt1'			=>	"%{_bindir}/mf2pt1\n",
+    'mkgrkindex'		=>	"%{_bindir}/mkgrkindex\n",
+    'mkjobtexmf'		=>	"%{_bindir}/mkjobtexmf\n",
     'mptopdf'			=>	"%{_bindir}/mptopdf\n",
+    'pax'			=>	"%{_bindir}/pdfannotextractor\n%{_javadir}/pax.jar\n",
     'pdfcrop'			=>	"%{_bindir}/pdfcrop\n%{_bindir}/rpdfcrop\n",
+    'pdftools'			=>	"%{_bindir}/e2pall\n%{_bindir}/pdfatfi\n%{_bindir}/ps4pdf\n",
+    'pedigree-perl'		=>	"%{_bindir}/pedigree\n",
+    'perltex'			=>	"%{_bindir}/perltex\n",
+    'pkfix'			=>	"%{_bindir}/pkfix\n",
+    'pstools'			=>	"%{_bindir}/ps2eps\n%{_bindir}/ps2frag\n%{_bindir}/pslatex\n",
+    'purifyeps'			=>	"%{_bindir}/purifyeps\n",
+    'splitindex'		=>	"%{_bindir}/splitindex\n",
+    'sty2dtx'			=>	"%{_bindir}/sty2dtx\n",
+    'svn-multi'			=>	"%{_bindir}/svn-multi\n",
     'tetex'			=>	"%{_bindir}/allcm
 %{_bindir}/allec
 %{_bindir}/allneeded
@@ -221,41 +332,192 @@ my %quirk_bin_files = (
 %{_bindir}/dvired
 %{_bindir}/fmtutil
 %{_bindir}/fmtutil-sys
+# installed by texlive-kpathsea.bin
+#%%{_bindir}/kpsetool
 %{_bindir}/kpsewhere
 %{_bindir}/texconfig-dialog
 %{_bindir}/texconfig-sys
 %{_bindir}/texlinks
 %{_bindir}/updmap
 %{_bindir}/updmap-sys\n",
-    # not really bin files
+    'texconfig'			=>	"%{_bindir}/texconfig\n",
+    'texcount'			=>	"%{_bindir}/texcount\n",
+    'texdef'			=>	"%{_bindir}/texdef\n",
+    'texdiff'			=>	"%{_bindir}/texdiff\n",
+    'texdirflatten'		=>	"%{_bindir}/texdirflatten\n",
+    'tex4ht'			=>	"%{_bindir}/ht
+%{_bindir}/htcontext
+%{_bindir}/htlatex
+%{_bindir}/htmex
+%{_bindir}/httex
+%{_bindir}/httexi
+%{_bindir}/htxelatex
+%{_bindir}/htxetex
+%{_bindir}/mk4ht\n",
+    'texdoc'			=>	"%{_bindir}/texdoc\n%{_bindir}/texdoctk\n",
     'texlive-docindex'		=>	"%doc %{_tlpkgdir}/texmf
 %doc %{_tlpkgdir}/texmf-dist\n",
     'texlive-scripts'		=>	"%{_bindir}/rungs\n",
+    'texliveonfly'		=>	"%{_bindir}/texliveonfly\n",
+    'texloganalyser'		=>	"%{_bindir}/texloganalyser\n",
+    'thumbpdf'			=>	"%{_bindir}/thumbpdf\n",
+    'tpic2pdftex'		=>	"%{_bindir}/tpic2pdftex\n",
     'typeoutfileinfo'		=>	"%{_bindir}/typeoutfileinfo\n",
+    'ulqda'			=>	"%{_bindir}/ulqda\n",
+    'uptex'			=>	"%{_bindir}/convbkmk\n",
+    'urlbst'			=>	"%{_bindir}/urlbst\n",
+    'vpe'			=>	"%{_bindir}/vpe\n",
     'xetex'			=>	"%{_bindir}/xelatex\n",
 );
 my %quirk_bin_source = (
     'context'			=>	"http://mirrors.ctan.org/systems/texlive/tlnet/archive/context.x86_64-linux.tar.xz",
-    'jfontmaps'			=>	"http://mirrors.ctan.org/systems/texlive/tlnet/archive/jfontmaps.x86_64-linux.tar.xz",
-    'tetex'			=>	"http://mirrors.ctan.org/systems/texlive/tlnet/archive/tetex.x86_64-linux.tar.xz"
+    'chktex'			=>	"http://mirrors.ctan.org/systems/texlive/tlnet/archive/chktex.x86_64-linux.tar.xz",
+    'dvipdfm'			=>	"http://mirrors.ctan.org/systems/texlive/tlnet/archive/dvipdfm.x86_64-linux.tar.xz",
+    'tpic2pdftex'		=>	"http://mirrors.ctan.org/systems/texlive/tlnet/archive/tpic2pdftex.x86_64-linux.tar.xz",
 );
 my %quirk_install = (
+    'a2ping'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/a2ping/a2ping.pl a2ping
+popd\n",
+    'authorindex'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/authorindex/authorindex authorindex
+popd\n",
+    'bibexport'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/bibexport/bibexport.sh bibexport
+popd\n",
+    'bundledoc'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/bundledoc/arlatex arlatex
+    ln -sf %{_texmfdistdir}/scripts/bundledoc/bundledoc bundledoc
+popd\n",
+    'cachepic'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/cachepic/cachepic.tlu cachepic
+popd\n",
     'checkcites'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/checkcites/checkcites.lua checkcites
 popd\n",
+    'chktex'			=>	"mkdir -p %{buildroot}%{_bindir}
+# shell script
+cp -fa bin/x86_64-linux/chkweb %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdir}/scripts/a2ping/deweb.pl deweb
+popd\n",
     'context'			=>	"# only lua scripts
 mkdir -p %{buildroot}%{_bindir}
 cp -fpa bin/x86_64-linux/* %{buildroot}%{_bindir}\n",
+    'ctanify'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ctanify/ctanify ctanify
+popd\n",
+    'ctanupload'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ctanupload/ctanupload.pl ctanupload
+popd\n",
+    'de-macro'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/de-macro/de-macro de-macro
+popd\n",
+    'dviasm'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/dviasm/dviasm.py dviasm
+popd\n",
+    'dvipdfm'			=>	"# shell script
+mkdir -p %{buildroot}%{_bindir}
+cp -far bin/x86_64-linux/dvipdft %{buildroot}%{_bindir}\n",
+    'dosepsbin'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/dosepsbin/dosepsbin.pl dosepsbin
+popd\n",
     'dvipdfmx'			=>	"mkdir -p %{buildroot}%{_tlpkgdir}
 cp -fpar tlpkg/tlpostcode %{buildroot}%{_tlpkgdir}\n",
+    'ebong'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ebong/ebong.py ebong
+popd\n",
+    'epstopdf'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/epstopdf/epstopdf.pl epstopdf
+    ln -sf epstopdf repstopdf
+popd\n",
+    'exceltex'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/exceltex/exceltex exceltex
+popd\n",
+    'fig4latex'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/fig4latex/fig4latex fig4latex
+popd\n",
     'findhyph'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/findhyph/findhyph findhyph
 popd\n",
+    'fontinst'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/tetex/fontinst.sh fontinst
+popd\n",
+    'fontools'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/fontools/afm2afm afm2afm
+    ln -sf %{_texmfdistdir}/scripts/fontools/autoinst autoinst
+    ln -sf %{_texmfdistdir}/scripts/fontools/cmap2enc cmap2enc
+    ln -sf %{_texmfdistdir}/scripts/fontools/font2afm font2afm
+    ln -sf %{_texmfdistdir}/scripts/fontools/ot2kpx ot2kpx
+    ln -sf %{_texmfdistdir}/scripts/fontools/pfm2kpx pfm2kpx
+    ln -sf %{_texmfdistdir}/scripts/fontools/showglyphs showglyphs
+popd\n",
+    'fragmaster'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/fragmaster/fragmaster.pl fragmaster
+popd\n",
+    'glossaries'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/glossaries/makeglossaries makeglossaries
+popd\n",
     'jfontmaps'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/jfontmaps/updmap-setup-kanji.pl updmap-setup-kanji
+    ln -sf %{_texmfdistdir}/scripts/jfontmaps/updmap-setup-kanji-sys.sh updmap-setup-kanji-sys
+popd\n",
+    'latex2man'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    # generate relative link manually because it appears to trigger some
+    # weird bug that causes the link to be removed
+    %define dont_relink                        1
+    ln -sf ../share/texmf-dist/scripts/latex2man/latex2man latex2man
+popd\n",
+    'latexmk'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/latexmk/latexmk.pl latexmk
+popd\n",
+    'latexpand'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/latexpand/latexpand latexpand
+popd\n",
+    'listbib'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/listbib/listbib listbib
+popd\n",
+    'lua2dox'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/lua2dox/lua2dox_lua lua2dox_lua
+    ln -sf lua2dox_lua lua2dox_filter
+popd\n",
+    'luaotfload'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/luaotfload/mkluatexfontdb.lua mkluatexfontdb
+popd\n",
+    'm-tx'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/m-tx/m-tx.lua m-tx
+popd\n",
+    'mf2pt1'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/mf2pt1/mf2pt1.pl mf2pt1
 popd\n",
     'mptopdf'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -265,17 +527,134 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/match_parens/match_parens match_parens
 popd\n",
+    'mathspic'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/mathspic/mathspic.pl mathspic
+popd\n",
+    'mkgrkindex'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/mkgrkindex/mkgrkindex mkgrkindex
+popd\n",
+    'mkjobtexmf'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/mkjobtexmf/mkjobtexmf.pl mkjobtexmf
+popd\n",
+    'pax'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/pax/pdfannotextractor.pl pdfannotextractor
+popd
+mkdir -p %{buildroot}%{_javadir}
+pushd %{buildroot}%{_javadir}
+    ln -sf %{_texmfdistdir}/scripts/pax/pax.jar pax.jar
+popd\n",
     'pdfcrop'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/pdfcrop/pdfcrop.pl pdfcrop
     ln -sf pdfcrop rpdfcrop
 popd\n",
-    'tetex'			=>	"# only scripts
+    'pdftools'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/tetex/e2pall.pl e2pall
+    ln -sf %{_texmfdistdir}/scripts/oberdiek/pdfatfi.pl pdfatfi
+    ln -sf %{_texmfdistdir}/scripts/pst-pdf/ps4pdf ps4pdf
+popd\n",
+    'pedigree-perl'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/pedigree-perl/pedigree.pl pedigree
+popd\n",
+    'perltex'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/perltex/perltex.pl perltex
+popd\n",
+    'pkfix'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/pkfix/pkfix.pl pkfix
+popd\n",
+    'pstools'			=>	"# 2 scripts and one binary
 mkdir -p %{buildroot}%{_bindir}
-cp -fpa bin/x86_64-linux/* %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdir}/scripts/ps2eps/ps2eps.pl ps2eps
+    ln -sf %{_texmfdistdir}/scripts/tetex/ps2frag.sh ps2frag
+    ln -sf %{_texmfdistdir}/scripts/tetex/pslatex.sh pslatex
+popd\n",
+    'purifyeps'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/purifyeps/purifyeps purifyeps
+popd\n",
+    'splitindex'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/splitindex/perl/splitindex.pl splitindex
+popd\n",
+    'sty2dtx'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/sty2dtx/sty2dtx.pl sty2dtx
+popd\n",
+    'svn-multi'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/svn-multi/svn-multi.pl svn-multi
+popd\n",
+    'tetex'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdir}/scripts/tetex/updmap.pl updmap
     ln -sf %{_texmfdir}/scripts/tetex/updmap-sys.sh updmap-sys
+    ln -sf %{_texmfdistdir}/scripts/tetex/allcm.sh allcm
+    ln -sf allcm allec
+    ln -sf %{_texmfdistdir}/scripts/tetex/allneeded.sh allneeded
+    ln -sf %{_texmfdistdir}/scripts/tetex/dvi2fax.sh dvi2fax
+    ln -sf %{_texmfdistdir}/scripts/tetex/dvired.sh dvired
+    ln -sf %{_texmfdir}/scripts/tetex/fmtutil.sh fmtutil
+    ln -sf %{_texmfdir}/scripts/tetex/fmtutil-sys.sh fmtutil-sys
+    # installed by texlive-kpathsea.bin
+    #ln -sf kpsepath kpsetool
+    #ln -sf kpsexpand kpsetool
+    ln -sf %{_texmfdistdir}/scripts/tetex/kpsetool.sh kpsetool
+    ln -sf %{_texmfdistdir}/scripts/tetex/kpsewhere.sh kpsewhere
+    ln -sf %{_texmfdir}/scripts/tetex/texconfig-dialog.sh texconfig-dialog
+    ln -sf %{_texmfdir}/scripts/tetex/texconfig-sys.sh texconfig-sys
+    ln -sf %{_texmfdir}/scripts/tetex/texlinks.sh texlinks
+    ln -sf %{_texmfdistdir}/scripts/tetex/updmap.pl updmap
+    ln -sf %{_texmfdistdir}/scripts/tetex/updmap-sys.sh updmap-sys
+popd\n",
+    'tex4ht'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/ht.sh ht
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/htcontext.sh htcontext
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/htlatex.sh htlatex
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/htmex.sh htmex
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/httex.sh httex
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/httexi.sh httexi
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/htxelatex.sh htxelatex
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/htxetex.sh htxetex
+    ln -sf %{_texmfdistdir}/scripts/tex4ht/mk4ht.pl mk4ht
+popd
+mkdir -p %{buildroot}%{_javadir}
+pushd %{buildroot}%{_javadir}
+    ln -sf %{_texmfdistdir}/tex4ht/bin/tex4ht.jar tex4ht.jar
+popd\n",
+    'texconfig'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdir}/scripts/tetex/texconfig.sh texconfig
+popd\n",
+    'texcount'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texcount/texcount.pl texcount
+popd\n",
+    'texdef'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texdef/texdef.pl texdef
+popd\n",
+    'texdiff'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texdiff/texdiff texdiff
+popd\n",
+    'texdirflatten'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texdirflatten/texdirflatten texdirflatten
+popd\n",
+    'texdoc'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texdoc/texdoc.tlu texdoc
+    ln -sf %{_texmfdistdir}/scripts/tetex/texdoctk.pl texdoctk
 popd\n",
     'texlive-docindex'		=>	"mkdir -p %{buildroot}%{_tlpkgdir}
 cp -fpa doc.html %{buildroot}%{_tlpkgdir}
@@ -291,9 +670,42 @@ popd
 mkdir -p %{buildroot}%{_tlpkgdir}
 cp -fa install-tl %{buildroot}%{_tlpkgdir}
 cp -fpar tlpkg/installer %{buildroot}%{_tlpkgdir}\n",
+    'texliveonfly'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texliveonfly/texliveonfly.py texliveonfly
+popd\n",
+    'texloganalyser'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texloganalyser/texloganalyser texloganalyser
+popd\n",
+    'thumbpdf'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/thumbpdf/thumbpdf.pl thumbpdf
+popd\n",
+    'tpic2pdftex'		=>	"# shell script
+mkdir -p %{buildroot}%{_bindir}
+cp -fpa bin/x86_64-linux/tpic2pdftex %{buildroot}%{_bindir}\n",
     'typeoutfileinfo'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdir}/scripts/typeoutfileinfo/typeoutfileinfo.sh typeoutfileinfo
+popd\n",
+    'ulqda'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ulqda/ulqda.pl ulqda
+popd\n",
+    'uptex'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/uptex/convbkmk.rb convbkmk
+popd\n",
+    'urlbst'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/urlbst/urlbst urlbst
+popd
+# remove bad \"dependency\" generation on \@PERL\@
+rm -f texmf-dist/doc/bibtex/urlbst/urlbst.in\n",
+    'vpe'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/vpe/vpe.pl vpe
 popd\n",
     'xetex'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -310,6 +722,14 @@ my %quirk_postun = (
 	rm -fr %{_texmfvardir}/web2c/pdftex\n",
     'metafont'			=>	"	rm -fr %{_texmfvardir}/web2c/metafont\n",
     'xetex'			=>	"	rm -fr %{_texmfvardir}/web2c/xetex\n"
+);
+# Avoid the need to pull too many dependencies from contrib to main
+my %quirk_suggests = (
+    'collection-latexextra'	=>	"exceltex",
+);
+
+my %quirk_cleanup = (
+    'tetex'			=>	"rm -f %{buildroot}%{_bindir}/kpsetool\n",
 );
 # quirks defs end
 ########################################################################
@@ -337,6 +757,7 @@ if (-f "$file.source.tlpobj") {
 }
 
 chomp(my $enable_asymptote = `rpm --eval "%{_texmf_enable_asymptote}"`);
+chomp(my $enable_biber = `rpm --eval "%{_texmf_enable_biber}"`);
 chomp(my $enable_xindy = `rpm --eval "%{_texmf_enable_xindy}"`);
 chomp(my $with_system_lcdf = `rpm --eval "%{_texmf_with_system_lcdf}"`);
 chomp(my $with_system_psutils = `rpm --eval "%{_texmf_with_system_psutils}"`);
@@ -385,6 +806,7 @@ if ($version eq "undef") {
     }
 }
 $version =~ s/[ \/]//g;
+$version =~ s/-/./g;
 if ($quirk_epoch{$name}) {
     print("Epoch:\t\t$quirk_epoch{$name}\n");
 }
@@ -463,7 +885,7 @@ sub file_list {
 	    $_ = "%{_tlpkgdir}/$_" unless (m|^/|);
 	}
 	# Update for moved files or use macro
-	if (/\.info$/) {
+	if (/doc\/info\/.*\.info$/) {
 	    s/%{_texmf(dist)?dir}\/doc\/info\/(.*)\.info/%{_infodir}\/$2\.info\*/;
 	    $infopages = 1;
 	}
@@ -504,6 +926,7 @@ sub file_list {
 sub should_skip {
     my ($package) = @_;
     return 1 if (!$enable_asymptote && $package =~ /^asymptote/);
+    return 1 if (!$enable_biber && $package =~ /^biber/);
     return 1 if (!$enable_xindy && $package =~ /^xindy/);
     return 1 if ($with_system_lcdf && $package =~ /^lcdftypetools/);
     return 1 if ($with_system_psutils &&
@@ -578,6 +1001,12 @@ if (!$binary && $name =~ /context/ && $name ne "context") {
 }
 if ($quirk_requires{$name}) {
     print($quirk_requires{$name});
+}
+if ($quirk_suggests{$name}) {
+    foreach my $suggests (split(" ", $quirk_suggests{$name})) {
+	print("Suggests:\ttexlive-$suggests\n");
+	$required{$suggests} = 1;
+    }
 }
 
 foreach my $requires ($tlpobj->depends()) {
@@ -796,6 +1225,10 @@ if ($needs_post) {
 	print(join("", @lualines));
 	print("EOF\n");
     }
+}
+
+if ($quirk_cleanup{$name}) {
+    print("$quirk_cleanup{$name}\n");
 }
 
 format multilineformat =

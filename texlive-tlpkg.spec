@@ -16,6 +16,7 @@
 %define _texmf_language_lua_d		%{_datadir}/tlpkg/language.lua.d
 
 %define _texmf_enable_asymptote		0
+%define _texmf_enable_biber		0
 %define _texmf_enable_xindy		0
 %define _texmf_with_system_dialog	1
 %define _texmf_with_system_lcdf		0
@@ -26,8 +27,8 @@
 %define _texmf_with_system_teckit	0
 
 Name:		texlive-tlpkg
-Version:	20120411
-Release:	3
+Version:	20121024
+Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -42,6 +43,10 @@ Source6:	checkupdates.pl
 Source7:	texlive.macros
 Source8:	tlmgr
 BuildArch:	noarch
+
+Requires:	perl-Proc-Daemon
+Requires:	perl-Proc-PID-File
+Requires:	perl-XML-XPath
 
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
@@ -111,6 +116,18 @@ ln -sf %{_bindir}/consolehelper %{buildroot}%{_bindir}/tlmgr
 
 
 %changelog
+* Tue Oct 30 2012 Paulo Andrade <pcpa@mandriva.com.br> 20121024-1
++ Revision: 821223
+- Rebuild to match updated metadata.
+
+* Fri Aug 10 2012 Paulo Andrade <pcpa@mandriva.com.br> 20120806-1
++ Revision: 813996
+- Update to match latest TeX Live upstream.
+- Update to latest release.
+- Disable texlive-biber by default.
+- Add new quirk_suggests to avoid dependency on contrib packages.
+- Update metadata after full synchronization with upstream texlive packages.
+
 * Fri Apr 13 2012 Paulo Andrade <pcpa@mandriva.com.br> 20120411-1
 + Revision: 790501
 - Update to match main texlive package and latest upstream perl scripts.
