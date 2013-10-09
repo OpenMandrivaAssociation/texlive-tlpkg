@@ -167,9 +167,15 @@ my %quirk_epoch = (
     'regexpatch'				=>	1,
     'sttools'					=>	1,
     'texdirflatten'				=>	1,
+    'tugboat-plain'				=>	1,
     'ucs'					=>	1,
+    'uni-wtal-ger'				=>	1,
     'uptex'					=>	1,
+    'xecolor'					=>	1,
     'xetex'					=>	1,
+    'xypic'					=>	1,
+    'yhmath'					=>	1,
+    'zwpagelayout'				=>	1,
 );
 my %quirk_prep = (
     'kpathsea'			=>	"\
@@ -700,9 +706,7 @@ popd\n",
     'urlbst'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/urlbst/urlbst urlbst
-popd
-# remove bad \"dependency\" generation on \@PERL\@
-rm -f texmf-dist/doc/bibtex/urlbst/urlbst.in\n",
+popd\n",
     'vpe'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/vpe/vpe.pl vpe

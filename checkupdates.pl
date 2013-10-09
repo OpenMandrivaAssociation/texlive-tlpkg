@@ -10,7 +10,7 @@ use TeXLive::TLPDB;
 
 if (! -f "/usr/share/tlpkg/texlive.tlpdb") {
     `wget http://mirrors.ctan.org/systems/texlive/tlnet/tlpkg/texlive.tlpdb.xz`;
-    `sudo sh -c "xz -d < SOURCES/texlive.tlpdb.xz > /usr/share/tlpkg/texlive.tlpdb"`;
+    `sudo sh -c "xz -d < texlive.tlpdb.xz > /usr/share/tlpkg/texlive.tlpdb"`;
 }
 
 my $tlpdb = TeXLive::TLPDB->new(root => "/usr/share");
@@ -46,8 +46,7 @@ if ($options{'u'}) {
     if ($?) {
 	die("failed to donwload texlive.tlpdb.xz\n");
     }
-    `mv -f texlive.tlpdb.xz SOURCES`;
-    `sudo sh -c "xz -d < SOURCES/texlive.tlpdb.xz > /usr/share/tlpkg/texlive.tlpdb"`;
+    `sudo sh -c "xz -d < texlive.tlpdb.xz > /usr/share/tlpkg/texlive.tlpdb"`;
     if ($?) {
 	die("failed unpack texlive.tlpdb under /usr/share/tlpkg\n");
     }
@@ -552,6 +551,7 @@ my @dirlist = (
     "texlive-cookingsymbols",
     "texlive-context-vim",
     "texlive-contour",
+    "texlive-convbkmk",
     "texlive-cooking",
     "texlive-cool",
     "texlive-coolthms",
@@ -2312,13 +2312,17 @@ my @dirlist = (
     "texlive-typeoutfileinfo",
     "texlive-typogrid",
     "texlive-uaclasses",
+    "texlive-uadocs",
     "texlive-uafthesis",
     "texlive-ucdavisthesis",
     "texlive-ucharclasses",
     "texlive-ucs",
     "texlive-ucthesis",
+    "texlive-udesoftec",
     "texlive-uebungsblatt",
+    "texlive-uestcthesis",
     "texlive-uhc",
+    "texlive-uiucredborder",
     "texlive-uiucthesis",
     "texlive-ukrhyph",
     "texlive-ulem",
@@ -2333,6 +2337,7 @@ my @dirlist = (
     "texlive-uwmslide",
     "texlive-unamthesis",
     "texlive-underlin",
+    "texlive-underoverlap",
     "texlive-underscore",
     "texlive-undolabl",
     "texlive-unicode-math",
@@ -2341,8 +2346,12 @@ my @dirlist = (
     "texlive-unitsdef",
     "texlive-universa",
     "texlive-uni-wtal-ger",
+    "texlive-uni-wtal-lin",
+    "texlive-unravel",
+    "texlive-unswcover",
     "texlive-uothesis",
     "texlive-uowthesis",
+    "texlive-uowthesistitlepage",
     "texlive-upca",
     "texlive-upmethodology",
     "texlive-upquote",
@@ -2366,7 +2375,9 @@ my @dirlist = (
     "texlive-varsfromjobname",
     "texlive-varwidth",
     "texlive-vaucanson-g",
+    "texlive-vdmlisting?",
     "texlive-velthuis",
+    "texlive-venndiagram",
     "texlive-venn",
     "texlive-venturisadf",
     "texlive-verbasef",
@@ -2404,12 +2415,15 @@ my @dirlist = (
     "texlive-wnri-latex",
     "texlive-wordlike",
     "texlive-wrapfig",
+    "texlive-wsemclassic",
     "texlive-wsuipa",
     "texlive-xargs",
     "texlive-xbmc",
+    "texlive-xcjk2uni",
     "texlive-xcite",
     "texlive-xcolor",
     "texlive-xcomment",
+    "texlive-xcookybooky",
     "texlive-xdoc",
     "texlive-xdvi",
     "texlive-xecjk",
@@ -2424,12 +2438,16 @@ my @dirlist = (
     "texlive-xetex-devanagari",
     "texlive-xetexfontinfo",
     "texlive-xetex-itrans",
+    "texlive-xetex-tibetan",
     "texlive-xetex-pstricks",
+    "texlive-xetexko",
     "texlive-xetexref",
+    "texlive-xevlna",
     "texlive-xfor",
     "texlive-xgreek",
     "texlive-xhfill",
     "texlive-xifthen",
+    "texlive-xint",
     "texlive-xits",
     "texlive-xkeyval",
     "texlive-xlop",
@@ -2442,6 +2460,7 @@ my @dirlist = (
     "texlive-xpatch",
     "texlive-xpeek",
     "texlive-xpinyin",
+    "texlive-xpicture",
     "texlive-xpunctuate",
     "texlive-xq",
     "texlive-xskak",
@@ -2473,12 +2492,84 @@ my @dirlist = (
     "texlive-ziffer",
     "texlive-zwgetfdate",
     "texlive-zwpagelayout",
+    "texlive-zxjafbfont",
+    "texlive-zxjafont",
+    "texlive-zxjatype",
+);
+
+my @remlist = (
+    "texlive-friulan",
+    "texlive-collection-documentation-turkish",
+    "texlive-gentium",
+    "texlive-lmextra",
+    "texlive-collection-documentation-korean",
+    "texlive-pstricks-tutorial",
+    "texlive-collection-documentation-vietnamese",
+    "texlive-collection-langfinnish",
+    "texlive-spanish",
+    "texlive-multi",
+    "texlive-grverb",
+    "texlive-collection-documentation-thai",
+    "texlive-collection-langcroatian",
+    "texlive-collection-langturkmen",
+    "texlive-collection-langvietnamese",
+    "texlive-collection-documentation-japanese",
+    "texlive-collection-langlatin",
+    "texlive-collection-langhungarian",
+    "texlive-collection-documentation-ukrainian",
+    "texlive-collection-documentation-bulgarian",
+    "texlive-collection-documentation-english",
+    "texlive-collection-documentation-mongolian",
+    "texlive-dvipdfm",
+    "texlive-collection-documentation-czechslovak",
+    "texlive-collection-langdanish",
+    "texlive-collection-langswedish",
+    "texlive-collection-langarmenian",
+    "texlive-collection-documentation-spanish",
+    "texlive-collection-documentation-portuguese",
+    "texlive-collection-documentation-dutch",
+    "texlive-xmlplay",
+    "texlive-romansh",
+    "texlive-collection-langdutch",
+    "texlive-serbianc",
+    "texlive-psafm",
+    "texlive-xbmc",
+    "texlive-collection-documentation-chinese",
+    "texlive-kopka",
+    "texlive-collection-documentation-german",
+    "texlive-magyar",
+    "texlive-collection-documentation-slovenian",
+    "texlive-biolinum-type1",
+    "texlive-ascii",
+    "texlive-thailatex",
+    "texlive-collection-documentation-serbian",
+    "texlive-collection-texinfo",
+    "texlive-collection-langhebrew",
+    "texlive-collection-langmongolian",
+    "texlive-macqassign",
+    "texlive-libertine-type1",
+    "texlive-collection-langnorwegian",
+    "texlive-libertineotf",
+    "texlive-collection-documentation-finnish",
+    "texlive-timesht",
+    "texlive-economic",
+    "texlive-collection-documentation-italian",
+    "texlive-collection-documentation-russian",
+    "texlive-collection-langtibetan",
+    "texlive-collection-langlatvian",
+    "texlive-collection-documentation-arabic",
+    "texlive-collection-documentation-polish",
+    "texlive-collection-documentation-base",
+    "texlive-polyglot",
+    "texlive-collection-documentation-french",
+    "texlive-collection-langlithuanian",
+    "texlive-lgrx",
 );
 
 foreach my $item (@dirlist) {
     unless (-d "../$item") {
 	if ($options{'i'}) {
-	    `cd ..; repsys co $item`;
+	    `cd ..; abf get $item`;
 	}
 	else {
 	    print("$item: not checked out\n");
@@ -2486,12 +2577,12 @@ foreach my $item (@dirlist) {
     }
 }
 
-foreach my $spec (glob("../texlive-*/SPECS/*.spec")) {
+foreach my $spec (glob("../texlive-*/*.spec")) {
     open(IN, "<$spec");
     my $line = <IN>;
     if ($line =~ /# revision (\d+)/) {
 	my $revision = $1;
-	$spec =~ m/\.\.\/texlive-(.*)\/SPECS/;
+	$spec =~ m/\.\.\/texlive-(.*)\//;
 	my $name = $1;
 	unless ($namerev{$name} || grep($_ eq "texlive-$name", @dirlist)) {
 	    print("texlive-$name: not handled\n");
@@ -2528,10 +2619,10 @@ foreach my $package ($tlpdb->list_packages()) {
 	    next;
         }
 	else {
-	    next if ($platform =~ /(armel|alpha|i386|mipsel|powerpc|sparc|x86_64)-linux/ ||
+	    next if ($platform =~ /(armel|armhf|alpha|i386|mipsel|powerpc|sparc|x86_64)-linux/ ||
 		     $platform =~ /(amd64|i386)-k?freebsd/ ||
 		     $platform =~ /i386-cygwin/ ||
-		     $platform =~ /i386-netbsd/ ||
+		     $platform =~ /(i386|amd64)-netbsd/ ||
 		     $platform =~ /mips-irix/ ||
 		     $platform =~ /powerpc-aix/ ||
 		     $platform =~ /(i386|sparc|x86_64)-solaris/ ||
@@ -2556,8 +2647,8 @@ foreach my $package ($tlpdb->list_packages()) {
     }
     if ($namerev{$package} ne $revision) {
 	if ($options{'i'}) {
-	    `cd ../texlive-$package; svn up`;
-	    open(IN, "../texlive-$package/SPECS/texlive-$package.spec");
+	    `cd ../texlive-$package; git pull`;
+	    open(IN, "../texlive-$package/texlive-$package.spec");
 	    my $line = <IN>;
 	    close(IN);
 	    if ($line =~ /# revision (\d+)/) {
@@ -2571,5 +2662,6 @@ foreach my $package ($tlpdb->list_packages()) {
 # Upstream may have deprecrated package
 foreach my $package (keys(%namerev)) {
     next if ($tlpdb->get_package($package));
+    next if grep (/$package/, @remlist);
     print("texlive-$package: not in texlive.tlpdb\n");
 }
