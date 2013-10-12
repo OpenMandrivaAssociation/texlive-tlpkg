@@ -48,6 +48,11 @@ pushd ../texlive-$PKG
     pushd tmp/SOURCES
         wget $MIRROR/$PKG{,.doc,.source}.tar.xz
     popd
+    for f in `ls *.tar.xz 2>/dev/null`; do
+        if [ ! -f tmp/SOURCES/`basename $f` ]; then
+	    cp $f tmp/SOURCES
+	fi
+    done
     for f in *.tar.xz; do
         git rm $f
     done
