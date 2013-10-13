@@ -65,13 +65,12 @@ my @block = (
 ########################################################################
 # quirks defs begin
 my %quirk_epoch = (
+    'adjustbox'					=>	1,
     'amiri'					=>	1,
-    'l3kernel'					=>	1,
-    'l3packages'				=>	1,
-    'gost'					=>	1,
-    'japanese-otf'				=>	1,
-    'japanese-otf-uptex'			=>	1,
-    'tcolorbox'					=>	1,
+    'caption'					=>	1,
+    'catcodes'					=>	1,
+    'ccicons'					=>	1,
+    'cmap'					=>	1,
     'collection-basic'				=>	1,
     'collection-bibtexextra'			=>	1,
     'collection-binextra'			=>	1,
@@ -156,10 +155,17 @@ my %quirk_epoch = (
     'collection-texinfo'			=>	1,
     'collection-xetex'				=>	1,
     'endheads'					=>	1,
+    'epstopdf'					=>	1,
     'euro-ce'					=>	1,
+    'francais-bst'				=>	1,
     'glossaries'				=>	1,
+    'gost'					=>	1,
     'inconsolata'				=>	1,
+    'japanese-otf'				=>	1,
+    'japanese-otf-uptex'			=>	1,
     'l2tabu-french'				=>	1,
+    'l3kernel'					=>	1,
+    'l3packages'				=>	1,
     'lgrx'					=>	1,
     'lshort-german'				=>	1,
     'ltxkeys'					=>	1,
@@ -174,6 +180,7 @@ my %quirk_epoch = (
     'regexpatch'				=>	1,
     'sidenotes'					=>	1,
     'sttools'					=>	1,
+    'tcolorbox'					=>	1,
     'texdirflatten'				=>	1,
     'texinfo'					=>	1,
     'tugboat-plain'				=>	1,
@@ -186,29 +193,30 @@ my %quirk_epoch = (
     'yhmath'					=>	1,
     'zwpagelayout'				=>	1,
 );
+
 my %quirk_prep = (
     'kpathsea'			=>	"\
-perl -pi -e 's%^(TEXMFMAIN\\s+= ).*%\$1%{_texmfdir}%;'			  \\\
+perl -pi -e 's%^(TEXMFMAIN\\s+= ).*%\$1%{_texmfdistdir}%;'			  \\\
 	 -e 's%^(TEXMFDIST\\s+= ).*%\$1%{_texmfdistdir}%;'		  \\\
 	 -e 's%^(TEXMFLOCAL\\s+= ).*%\$1%{_texmflocaldir}%;'		  \\\
 	 -e 's%^(TEXMFSYSVAR\\s+= ).*%\$1%{_texmfvardir}%;'		  \\\
 	 -e 's%^(TEXMFSYSCONFIG\\s+= ).*%\$1%{_texmfconfdir}%;'		  \\\
 	 -e 's%^(TEXMFHOME\\s+= ).*%\$1\\\$HOME/texmf%;'			  \\\
-	 -e 's%^(TEXMFVAR\\s+= ).*%\$1\\\$HOME/.texlive2011/texmf-var%;'	  \\\
-	 -e 's%^(TEXMFCONFIG\\s+= ).*%\$1\\\$HOME/.texlive2011/texmf-config%;'\\\
+	 -e 's%^(TEXMFVAR\\s+= ).*%\$1\\\$HOME/.texlive2013/texmf-var%;'	  \\\
+	 -e 's%^(TEXMFCONFIG\\s+= ).*%\$1\\\$HOME/.texlive2013/texmf-config%;'\\\
 	 -e 's%^(OSFONTDIR\\s+= ).*%\$1%{_datadir}/fonts%;'		  \\\
 	texmf/web2c/texmf.cnf
 ",
     'luatex'			=>	"\
-perl -pi -e 's%^(\\s*TEXMFMAIN\\s+=\\s+\").*%\$1%{_texmfdir}\",%;'				\\\
+perl -pi -e 's%^(\\s*TEXMFMAIN\\s+=\\s+\").*%\$1%{_texmfdistdir}\",%;'				\\\
 	 -e 's%\\bTEXMFCONTEXT\\b%TEXMFDIST%g;'						\\\
 	 -e 's%^(\\s*TEXMFDIST\\s+=\\s+).*%\$1\"%{_texmfdistdir}\",%;'			\\\
 	 -e 's%^(\\s*TEXMFLOCAL\\s+=\\s+).*%\$1\"%{_texmflocaldir}\",%;'			\\\
 	 -e 's%^(\\s*TEXMFSYSVAR\\s+=\\s+).*%\$1\"%{_texmfvardir}\",%;'			\\\
 	 -e 's%^(\\s*TEXMFSYSCONFIG\\s+=\\s+).*%\$1\"%{_texmfconfdir}\",%;'			\\\
 	 -e 's%^(\\s*TEXMFHOME\\s+=\\s+\").*%\$1\\\$HOME/texmf\",%;'				\\\
-	 -e 's%^(\\s*TEXMFVAR\\s+=\\s+\").*%\$1\\\$HOME/.texlive2011/texmf-var\",%;'		\\\
-	 -e 's%^(\\s*TEXMFCONFIG\\s+=\\s+\").*%\$1\\\$HOME/.texlive2011/texmf-config\",%;'	\\\
+	 -e 's%^(\\s*TEXMFVAR\\s+=\\s+\").*%\$1\\\$HOME/.texlive2013/texmf-var\",%;'		\\\
+	 -e 's%^(\\s*TEXMFCONFIG\\s+=\\s+\").*%\$1\\\$HOME/.texlive2013/texmf-config\",%;'	\\\
 	 -e 's%^(\\s*FONTCONFIG_PATH\\s+=\\s+\").*%\$1%{_sysconfdir}/fonts\",%;'		\\\
 	 -e 's|^local texmflocal.*\$||;'							\\\
 	 -e 's|^texmflocal.*\$||;'							\\\
@@ -227,9 +235,13 @@ my %quirk_requires = (
 Requires(post):	texlive-texconfig
 # pdftex requires updmap
 Requires(post):	texlive-pdftex.bin\n",
+    'berenisadf'		=>	"Requires:	fontforge\n",
+    'gnu-freefont'		=>	"Requires:	fontforge\n",
 );
 my %quirk_provides_bin = (
     'a2ping'			=>	1,
+    'adhocfilelist'		=>	1,
+    'arara'			=>	1,
     'authorindex'		=>	1,
     'bibexport'			=>	1,
     'bundledoc'			=>	1,
@@ -240,9 +252,11 @@ my %quirk_provides_bin = (
     'ctanupload'		=>	1,
     'de-macro'			=>	1,
     'dosepsbin'			=>	1,
+    'dtxgen'			=>	1,
     'dviasm'			=>	1,
     'dvipdfm'			=>	1,
     'ebong'			=>	1,
+    'epspdf'			=>	1,
     'epstopdf'			=>	1,
     'exceltex'			=>	1,
     'fig4latex'			=>	1,
@@ -260,6 +274,7 @@ my %quirk_provides_bin = (
     'latexpand'			=>	1,
     'listbib'			=>	1,
     'listings-ext'		=>	1,
+    'ltxfileinfo'		=>	1,
     'lua2dox'			=>	1,
     'luaotfload'		=>	1,
     'match_parens'		=>	1,
@@ -268,15 +283,18 @@ my %quirk_provides_bin = (
     'mkgrkindex'		=>	1,
     'mkjobtexmf'		=>	1,
     'mptopdf'			=>	1,
+    'multibibliography'		=>	1,
     'musixtex'			=>	1,
     'pax'			=>	1,
     'pdfcrop'			=>	1,
     'pdfjam'			=>	1,
     'pedigree-perl'		=>	1,
     'perltex'			=>	1,
+    'pfarrei'			=>	1,
     'pkfix'			=>	1,
     'pkfix-helper'		=>	1,
     'pst2pdf'			=>	1,
+    'ptex2pdf'			=>	1,
     'purifyeps'			=>	1,
     'splitindex'		=>	1,
     'sty2dtx'			=>	1,
@@ -301,6 +319,8 @@ my %quirk_provides_bin = (
 );
 my %quirk_bin_files = (
     'a2ping'			=>	"%{_bindir}/a2ping\n",
+    'adhocfilelist'		=>	"%{_bindir}/adhocfilelist\n",
+    'arara'			=>	"%{_bindir}/arara\n",
     'authorindex'		=>	"%{_bindir}/authorindex\n",
     'bibexport'			=>	"%{_bindir}/bibexport\n",
     'bundledoc'			=>	"%{_bindir}/arlatex\n%{_bindir}/bundledoc\n",
@@ -312,9 +332,11 @@ my %quirk_bin_files = (
     'ctanupload'		=>	"%{_bindir}/ctanupload\n",
     'de-macro'			=>	"%{_bindir}/de-macro\n",
     'dosepsbin'			=>	"%{_bindir}/dosepsbin\n",
+    'dtxgen'			=>	"%{_bindir}/dtxgen\n",
     'dviasm'			=>	"%{_bindir}/dviasm\n",
     'dvipdfm'			=>	"%{_bindir}/dvipdft\n",
     'ebong'			=>	"%{_bindir}/ebong\n",
+    'epspdf'			=>	"%{_bindir}/epspdf\n%{_bindir}/epspdftk\n",
     'epstopdf'			=>	"%{_bindir}/epstopdf\n%{_bindir}/repstopdf\n",
     'exceltex'			=>	"%{_bindir}/exceltex\n",
     'fig4latex'			=>	"%{_bindir}/fig4latex\n",
@@ -335,8 +357,9 @@ my %quirk_bin_files = (
     'latexpand'			=>	"%{_bindir}/latexpand\n",
     'listbib'			=>	"%{_bindir}/listbib\n",
     'listings-ext'		=>	"%{_bindir}/listings-ext.sh\n",
+    'ltxfileinfo'		=>	"%{_bindir}/ltxfileinfo\n",
     'lua2dox'			=>	"%{_bindir}/lua2dox_filter\n%{_bindir}/lua2dox_lua\n",
-    'luaotfload'		=>	"%{_bindir}/mkluatexfontdb\n",
+    'luaotfload'		=>	"%{_bindir}/luaotfload-tool\n%{_bindir}/mkluatexfontdb\n",
     'm-tx'			=>	"%{_bindir}/m-tx\n",
     'match_parens'		=>	"%{_bindir}/match_parens\n",
     'mathspic'			=>	"%{_bindir}/mathspic\n",
@@ -344,6 +367,7 @@ my %quirk_bin_files = (
     'mkgrkindex'		=>	"%{_bindir}/mkgrkindex\n",
     'mkjobtexmf'		=>	"%{_bindir}/mkjobtexmf\n",
     'mptopdf'			=>	"%{_bindir}/mptopdf\n",
+    'multibibliography'		=>	"%{_bindir}/multibibliography\n",
     'musixtex'			=>	"%{_bindir}/musixflx\n%{_bindir}/musixtex\n",
     'pax'			=>	"%{_bindir}/pdfannotextractor\n%{_javadir}/pax.jar\n",
     'pst2pdf' 			=>	"%{_bindir}/pst2pdf\n",
@@ -363,9 +387,11 @@ my %quirk_bin_files = (
     'pdftools'			=>	"%{_bindir}/e2pall\n%{_bindir}/pdfatfi\n%{_bindir}/ps4pdf\n",
     'pedigree-perl'		=>	"%{_bindir}/pedigree\n",
     'perltex'			=>	"%{_bindir}/perltex\n",
+    'pfarrei'			=>	"%{_bindir}/a5toa4\n%{_bindir}/pfarrei\n",
     'pkfix'			=>	"%{_bindir}/pkfix\n",
     'pkfix-helper'		=>	"%{_bindir}/pkfix-helper\n",
     'pstools'			=>	"%{_bindir}/ps2eps\n%{_bindir}/ps2frag\n%{_bindir}/pslatex\n",
+    'ptex2pdf'			=>	"%{_bindir}/ptex2pdf\n",
     'purifyeps'			=>	"%{_bindir}/purifyeps\n",
     'splitindex'		=>	"%{_bindir}/splitindex\n",
     'sty2dtx'			=>	"%{_bindir}/sty2dtx\n",
@@ -425,10 +451,20 @@ my %quirk_install = (
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/a2ping/a2ping.pl a2ping
 popd\n",
+    'adhocfilelist'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/adhocfilelist/adhocfilelist.sh adhocfilelist
+popd\n",
+    'arara'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/arara/arara.sh arara
+popd\n",
     'authorindex'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/authorindex/authorindex authorindex
 popd\n",
+    'berenisadf'		=>	"perl -pi -e 's|/usr/local/bin/fontforge|/usr/bin/fontforge|'		\
+    source/fonts/berenisadf/ff-ybd.pe\n",
     'bibexport'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/bibexport/bibexport.sh bibexport
@@ -467,6 +503,10 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/de-macro/de-macro de-macro
 popd\n",
+    'dtxgen'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/dtxgen/dtxgen dtxgen
+popd\n",
     'dviasm'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/dviasm/dviasm.py dviasm
@@ -483,6 +523,11 @@ cp -fpar tlpkg/tlpostcode %{buildroot}%{_tlpkgdir}\n",
     'ebong'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/ebong/ebong.py ebong
+popd\n",
+    'epspdf'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/epspdf/epspdf.rb epspdf
+    ln -sf %{_texmfdistdir}/scripts/epspdf/epspdftk.tcl epspdftk
 popd\n",
     'epstopdf'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -503,7 +548,7 @@ pushd %{buildroot}%{_bindir}
 popd\n",
     'fontinst'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
-    ln -sf %{_texmfdistdir}/scripts/tetex/fontinst.sh fontinst
+    ln -sf %{_texmfdistdir}/scripts/texlive/fontinst.sh fontinst
 popd\n",
     'fontools'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -565,6 +610,10 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/listings-ext/listings-ext.sh listings-ext.sh
 popd\n",
+    'ltxfileinfo'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ltxfileinfo/ltxfileinfo ltxfileinfo
+popd\n",
     'lua2dox'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/lua2dox/lua2dox_lua lua2dox_lua
@@ -572,6 +621,7 @@ pushd %{buildroot}%{_bindir}
 popd\n",
     'luaotfload'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/luaotfload/luaotfload-tool.lua luaotfload-tool
     ln -sf %{_texmfdistdir}/scripts/luaotfload/mkluatexfontdb.lua mkluatexfontdb
 popd\n",
     'm-tx'			=>	"mkdir -p %{buildroot}%{_bindir}
@@ -601,6 +651,10 @@ popd\n",
     'mkjobtexmf'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/mkjobtexmf/mkjobtexmf.pl mkjobtexmf
+popd\n",
+    'multibibliography'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/multibibliography/multibibliography.pl multibibliography
 popd\n",
      'musixtex'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -645,6 +699,11 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/pedigree-perl/pedigree.pl pedigree
 popd\n",
+    'pfarrei'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/pfarrei/a5toa4.tlu a5toa4
+    ln -sf %{_texmfdistdir}/scripts/pfarrei/pfarrei.tlu pfarrei
+popd\n",
     'perltex'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/perltex/perltex.pl perltex
@@ -666,6 +725,10 @@ pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/ps2eps/ps2eps.pl ps2eps
     ln -sf %{_texmfdistdir}/scripts/tetex/ps2frag.sh ps2frag
     ln -sf %{_texmfdistdir}/scripts/tetex/pslatex.sh pslatex
+popd\n",
+    'ptex2pdf'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ptex2pdf/ptex2pdf.lua ptex2pdf
 popd\n",
     'purifyeps'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
