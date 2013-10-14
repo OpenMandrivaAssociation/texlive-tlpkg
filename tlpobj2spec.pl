@@ -193,7 +193,6 @@ my %quirk_epoch = (
     'yhmath'					=>	1,
     'zwpagelayout'				=>	1,
 );
-
 my %quirk_prep = (
     'kpathsea'			=>	"\
 perl -pi -e 's%^(TEXMFMAIN\\s+= ).*%\$1%{_texmfdistdir}%;'			  \\\
@@ -267,6 +266,7 @@ my %quirk_provides_bin = (
     'jfontmaps'			=>	1,
     'glossaries'		=>	1,
     'installfont'		=>	1,
+    'latex-git-log'		=>	1,
     'latex2man'			=>	1,
     'latexdiff'			=>	1,
     'latexmk'			=>	1,
@@ -348,6 +348,7 @@ my %quirk_bin_files = (
     'installfont'		=>	"%{_bindir}/installfont-tl\n",
     'jfontmaps'			=>	"%{_bindir}/updmap-setup-kanji
 %{_bindir}/updmap-setup-kanji-sys\n",
+    'latex-git-log'		=>	"%{_bindir}/latex-git-log\n",
     'latex2man'			=>	"%{_bindir}/latex2man\n",
     'latexdiff'			=>	"%{_bindir}/latexdiff-vc
 %{_bindir}/latexdiff
@@ -576,6 +577,10 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/jfontmaps/updmap-setup-kanji.pl updmap-setup-kanji
     ln -sf %{_texmfdistdir}/scripts/jfontmaps/updmap-setup-kanji-sys.sh updmap-setup-kanji-sys
+popd\n",
+    'latex-git-log'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf ../share/texmf-dist/scripts/latex-git-log/latex-git-log latex-git-log
 popd\n",
     'latex2man'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
