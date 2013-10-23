@@ -68,8 +68,8 @@ while (1) {
 	last;
     }
 
-    if (open(IN, "</usr/share/texmf/web2c/fmtutil-hdr.cnf")) {
-	open(OUT, ">/usr/share/texmf/web2c/fmtutil.cnf");
+    if (open(IN, "</usr/share/texmf-dist/web2c/fmtutil-hdr.cnf")) {
+	open(OUT, ">/usr/share/texmf-dist/web2c/fmtutil.cnf");
 	$data = <IN>;
 	close(IN);
 	print(OUT $data);
@@ -86,8 +86,8 @@ while (1) {
 	}
 	close(OUT);
     }
-    if (open(IN, "</usr/share/texmf/web2c/updmap-hdr.cfg")) {
-	open(OUT, ">/usr/share/texmf/web2c/updmap.cfg");
+    if (open(IN, "</usr/share/texmf-dist/web2c/updmap-hdr.cfg")) {
+	open(OUT, ">/usr/share/texmf-dist/web2c/updmap.cfg");
 	open(OUT2, ">/etc/texmf/web2c/updmap.cfg");
 	$data = <IN>;
 	close(IN);
@@ -109,8 +109,8 @@ while (1) {
 	close(OUT);
 	close(OUT2);
     }
-    if (open(IN, "</usr/share/texmf/tex/generic/config/language.us")) {
-	open(OUT, ">/usr/share/texmf/tex/generic/config/language.dat");
+    if (open(IN, "</usr/share/texmf-dist/tex/generic/config/language.us")) {
+	open(OUT, ">/usr/share/texmf-dist/tex/generic/config/language.dat");
 	$data = <IN>;
 	close(IN);
 	print(OUT $data);
@@ -127,8 +127,8 @@ while (1) {
 	}
 	close(OUT);
     }
-    if (open(IN, "</usr/share/texmf/tex/generic/config/language.us.def")) {
-	open(OUT, ">/usr/share/texmf/tex/generic/config/language.def");
+    if (open(IN, "</usr/share/texmf-dist/tex/generic/config/language.us.def")) {
+	open(OUT, ">/usr/share/texmf-dist/tex/generic/config/language.def");
 	$data = <IN>;
 	close(IN);
 	print(OUT $data);

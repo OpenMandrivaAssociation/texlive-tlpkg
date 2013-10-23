@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20131007
-Release:	2
+Release:	3
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -63,8 +63,8 @@ free software, including support for many languages around the world.
 %files
 %dir %{_tlpkgdir}
 %{_tlpkgdir}/TeXLive/
-%{_texmfdir}/web2c/fmtutil-hdr.cnf
-%{_texmfdir}/web2c/updmap-hdr.cfg
+%{_texmfdistdir}/web2c/fmtutil-hdr.cnf
+%{_texmfdistdir}/web2c/updmap-hdr.cfg
 %dir %{_texmf_fmtutil_d}
 %dir %{_texmf_updmap_d}
 %dir %{_texmf_language_dat_d}
@@ -94,8 +94,8 @@ mkdir -p %{buildroot}%{_texmf_language_dat_d}
 mkdir -p %{buildroot}%{_texmf_language_def_d}
 mkdir -p %{buildroot}%{_texmf_language_lua_d}
 
-install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdir}/web2c/fmtutil-hdr.cnf
-install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdir}/web2c/updmap-hdr.cfg
+install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdistdir}/web2c/fmtutil-hdr.cnf
+install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdistdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -D -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
 install -D -m644 %{SOURCE7} %{buildroot}/etc/rpm/macros.d/texlive.macros
