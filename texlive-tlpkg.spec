@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20131007
-Release:	3
+Release:	4
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -50,7 +50,7 @@ Requires:	perl-XML-XPath
 
 %post
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
-	cp -f %{_texmfdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
+	cp -f %{_texmfdistdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
     fi
     %{_sbindir}/texlive.post
 
