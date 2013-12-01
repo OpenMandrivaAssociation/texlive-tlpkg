@@ -67,6 +67,8 @@ my @block = (
 my %quirk_epoch = (
     'adjustbox'					=>	1,
     'amiri'					=>	1,
+    'babel-bulgarian'				=>	1,
+    'boites'					=>	1,
     'caption'					=>	1,
     'catcodes'					=>	1,
     'ccicons'					=>	1,
@@ -272,6 +274,7 @@ my %quirk_provides_bin = (
     'latexdiff'			=>	1,
     'latexmk'			=>	1,
     'latexfileversion'		=>	1,
+    'latexindent'		=>	1,
     'latexpand'			=>	1,
     'listbib'			=>	1,
     'listings-ext'		=>	1,
@@ -357,6 +360,7 @@ my %quirk_bin_files = (
 %{_bindir}/latexdiff
 %{_bindir}/latexrevise\n",
     'latexfileversion'		=>	"%{_bindir}/latexfileversion\n",
+    'latexindent'		=>	"%{_bindir}/latexindent\n",
     'latexmk'			=>	"%{_bindir}/latexmk\n",
     'latexpand'			=>	"%{_bindir}/latexpand\n",
     'listbib'			=>	"%{_bindir}/listbib\n",
@@ -464,8 +468,8 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/authorindex/authorindex authorindex
 popd\n",
-    'berenisadf'		=>	"perl -pi -e 's|/usr/local/bin/fontforge|/usr/bin/fontforge|'		\
-    source/fonts/berenisadf/ff-ybd.pe\n",
+    'berenisadf'		=>	"perl -pi -e 's|/usr/local/bin/fontforge|/usr/bin/fontforge|'		\\\
+    fonts/berenisadf/ff-ybd.pe\n",
     'bibexport'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/bibexport/bibexport.sh bibexport
@@ -601,6 +605,10 @@ pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/latexdiff/latexdiff-vc.pl latexdiff-vc
     ln -sf %{_texmfdistdir}/scripts/latexdiff/latexdiff.pl latexdiff
     ln -sf %{_texmfdistdir}/scripts/latexdiff/latexrevise.pl latexrevise
+popd\n",
+    'latexindent'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/latexindent/latexindent.pl latexindent
 popd\n",
     'latexmk'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
