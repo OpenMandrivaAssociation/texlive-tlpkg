@@ -27,7 +27,7 @@
 %define _texmf_with_system_teckit	0
 
 Name:		texlive-tlpkg
-Version:	20131201
+Version:	20131129
 Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
