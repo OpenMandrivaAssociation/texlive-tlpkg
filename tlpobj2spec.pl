@@ -18,6 +18,7 @@ my %Tags = (
     'kpathsea'	=>	"%rename kpathsea",
     'pdfjam'	=>	"%rename pdfjam",
     'latexdiff'	=>	"%rename latexdiff",
+    'passivetex'=>	"%rename passivetex",
     'pstools'	=>	"%rename ps2eps",
     'dvipdfm'	=>	"%rename tetex-dvipdfm, %rename texlive-texmf-dvipdfm",
     'dviljk'	=>	"%rename tetex-dvilj, %rename texlive-dvilj",
@@ -68,6 +69,7 @@ my %quirk_epoch = (
     'adjustbox'					=>	1,
     'amiri'					=>	1,
     'babel-bulgarian'				=>	1,
+    'babel-german'				=>	1,
     'boites'					=>	1,
     'caption'					=>	1,
     'catcodes'					=>	1,
@@ -156,6 +158,7 @@ my %quirk_epoch = (
     'collection-science'			=>	1,
     'collection-texinfo'			=>	1,
     'collection-xetex'				=>	1,
+    'dvipdfmx-def'				=>	1,
     'endheads'					=>	1,
     'epstopdf'					=>	1,
     'euro-ce'					=>	1,
@@ -172,6 +175,7 @@ my %quirk_epoch = (
     'lshort-german'				=>	1,
     'ltxkeys'					=>	1,
     'mf2pt1'					=>	1,
+    'mflogo'					=>	1,
     'nicefilelist'				=>	1,
     'nicetext'					=>	1,
     'nlctdoc'					=>	1,
@@ -1313,6 +1317,9 @@ if ($relocated) {
     }
     if ($mktexlsr && grep(/RELOC\/tex\//, $tlpobj->runfiles())) {
 	$cp = "$cp tex";
+    }
+    if ($mktexlsr && grep(/RELOC\/mft\//, $tlpobj->runfiles())) {
+	$cp = "$cp mft";
     }
     if ($tlpobjdoc || $copydoc) {
 	$cp = "$cp doc";
