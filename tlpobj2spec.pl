@@ -283,6 +283,7 @@ my %quirk_provides_bin = (
     'listbib'			=>	1,
     'listings-ext'		=>	1,
     'ltxfileinfo'		=>	1,
+    'ltximg'			=>	1,
     'lua2dox'			=>	1,
     'luaotfload'		=>	1,
     'match_parens'		=>	1,
@@ -301,9 +302,11 @@ my %quirk_provides_bin = (
     'pfarrei'			=>	1,
     'pkfix'			=>	1,
     'pkfix-helper'		=>	1,
+    'pmxchords'			=>	1,
     'pst2pdf'			=>	1,
     'ptex2pdf'			=>	1,
     'purifyeps'			=>	1,
+    'rubik'			=>	1,
     'splitindex'		=>	1,
     'sty2dtx'			=>	1,
     'svn-multi'			=>	1,
@@ -370,6 +373,7 @@ my %quirk_bin_files = (
     'listbib'			=>	"%{_bindir}/listbib\n",
     'listings-ext'		=>	"%{_bindir}/listings-ext.sh\n",
     'ltxfileinfo'		=>	"%{_bindir}/ltxfileinfo\n",
+    'ltximg'			=>	"%{_bindir}/ltximg\n",
     'lua2dox'			=>	"%{_bindir}/lua2dox_filter\n",
     'luaotfload'		=>	"%{_bindir}/luaotfload-tool\n%{_bindir}/mkluatexfontdb\n",
     'm-tx'			=>	"%{_bindir}/m-tx\n",
@@ -402,9 +406,11 @@ my %quirk_bin_files = (
     'pfarrei'			=>	"%{_bindir}/a5toa4\n%{_bindir}/pfarrei\n",
     'pkfix'			=>	"%{_bindir}/pkfix\n",
     'pkfix-helper'		=>	"%{_bindir}/pkfix-helper\n",
+    'pmxchords'			=>	"%{_bindir}/pmxchords\n",
     'pstools'			=>	"%{_bindir}/ps2eps\n%{_bindir}/ps2frag\n%{_bindir}/pslatex\n",
     'ptex2pdf'			=>	"%{_bindir}/ptex2pdf\n",
     'purifyeps'			=>	"%{_bindir}/purifyeps\n",
+    'rubik'			=>	"%{_bindir}/rubikrotation\n",
     'splitindex'		=>	"%{_bindir}/splitindex\n",
     'sty2dtx'			=>	"%{_bindir}/sty2dtx\n",
     'svn-multi'			=>	"%{_bindir}/svn-multi\n",
@@ -638,6 +644,10 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/ltxfileinfo/ltxfileinfo ltxfileinfo
 popd\n",
+    'ltximg'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/ltximg/ltximg.pl ltximg
+popd\n",
     'lua2dox'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/lua2dox/lua2dox_filter lua2dox_filter
@@ -739,6 +749,10 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/pkfix-helper/pkfix-helper pkfix-helper
 popd\n",
+    'pmxchords'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/pmxchords/pmxchords.lua pmxchords
+popd\n",
     'pst2pdf'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/pst2pdf/pst2pdf.pl pst2pdf
@@ -756,6 +770,10 @@ popd\n",
     'purifyeps'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/purifyeps/purifyeps purifyeps
+popd\n",
+    'rubik'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/rubik/rubikrotation.pl rubikrotation
 popd\n",
     'splitindex'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
