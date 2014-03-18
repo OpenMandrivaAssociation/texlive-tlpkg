@@ -69,6 +69,7 @@ my %quirk_epoch = (
     'adjustbox'					=>	1,
     'amiri'					=>	1,
     'babel-bulgarian'				=>	1,
+    'babel-estonian'				=>	1,
     'babel-german'				=>	1,
     'boites'					=>	1,
     'caption'					=>	1,
@@ -180,12 +181,14 @@ my %quirk_epoch = (
     'nicetext'					=>	1,
     'nlctdoc'					=>	1,
     'nrc'					=>	1,
+    'numberedblock'				=>	1,
     'patgen'					=>	1,
     'preprint'					=>	1,
     'pst-tools'					=>	1,
     'regexpatch'				=>	1,
     'sidenotes'					=>	1,
     'sttools'					=>	1,
+    'tabstackengine'				=>	1,
     'tcolorbox'					=>	1,
     'texdirflatten'				=>	1,
     'texinfo'					=>	1,
@@ -280,6 +283,7 @@ my %quirk_provides_bin = (
     'latexfileversion'		=>	1,
     'latexindent'		=>	1,
     'latexpand'			=>	1,
+    'lilyglyphs'		=>	1,
     'listbib'			=>	1,
     'listings-ext'		=>	1,
     'ltxfileinfo'		=>	1,
@@ -318,6 +322,7 @@ my %quirk_provides_bin = (
     'texdiff'			=>	1,
     'texdirflatten'		=>	1,
     'texdoc'			=>	1,
+    'texfot'			=>	1,
     'texlive-scripts'		=>	1,
     'texliveonfly'		=>	1,
     'texloganalyser'		=>	1,
@@ -370,6 +375,7 @@ my %quirk_bin_files = (
     'latexindent'		=>	"%{_bindir}/latexindent\n",
     'latexmk'			=>	"%{_bindir}/latexmk\n",
     'latexpand'			=>	"%{_bindir}/latexpand\n",
+    'lilyglyphs'		=>	"%{_bindir}/lily-*\n",
     'listbib'			=>	"%{_bindir}/listbib\n",
     'listings-ext'		=>	"%{_bindir}/listings-ext.sh\n",
     'ltxfileinfo'		=>	"%{_bindir}/ltxfileinfo\n",
@@ -444,6 +450,7 @@ my %quirk_bin_files = (
 %{_bindir}/htxetex
 %{_bindir}/mk4ht\n",
     'texdoc'			=>	"%{_bindir}/texdoc\n%{_bindir}/texdoctk\n",
+    'texfot'			=>	"%{_bindir}/texfot\n",
     'texlive-docindex'		=>	"%doc %{_tlpkgdir}/texmf
 %doc %{_tlpkgdir}/texmf-dist\n",
     'texlive-scripts'		=>	"%{_bindir}/rungs\n",
@@ -635,6 +642,12 @@ popd\n",
     'listbib'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/listbib/listbib listbib
+popd\n",
+    'lilyglyphs'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/lilyglyphs/lily-glyph-commands.py lily-glyph-commands
+    ln -sf %{_texmfdistdir}/scripts/lilyglyphs/lily-image-commands.py lily-image-commands
+    ln -sf %{_texmfdistdir}/scripts/lilyglyphs/lily-rebuild-pdfs.py lily-rebuild-pdfs
 popd\n",
     'listings-ext'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -846,6 +859,10 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/texdoc/texdoc.tlu texdoc
     ln -sf %{_texmfdistdir}/scripts/texdoctk/texdoctk.pl texdoctk
+popd\n",
+    'texfot'			=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texfot/texfot.pl texfot
 popd\n",
     'texlive-docindex'		=>	"mkdir -p %{buildroot}%{_tlpkgdir}
 cp -fpa doc.html %{buildroot}%{_tlpkgdir}

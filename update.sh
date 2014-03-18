@@ -90,10 +90,10 @@ pushd ../texlive-$PKG
     if [ x$ans = x -o x$ans = xy -o x$ans = xY ]; then
         if git commit -a -m '- Update to latest release.'; then
 	    git push --all
-            echo -n "Run abf build -a x86_64 -a i586 -a armv7l -a armv7hl -s main --auto-publish --update-type enhancement ? [Yn] "
+            echo -n "Run abf build -a x86_64 -a i586 -a armv7l -a armv7hl -a aarch64 -s main --auto-publish --update-type enhancement ? [Yn] "
             read ans
             if [ x$ans = x -o x$ans = xy -o x$ans = xY ]; then
-                if abf build -a x86_64 -a i586 -a armv7l -a armv7hl -s main --auto-publish --update-type enhancement; then
+                if abf build -a x86_64 -a i586 -a armv7l -a armv7hl -a aarch64 -s main --auto-publish --update-type enhancement; then
                     exit 1
                 fi
             else
