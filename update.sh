@@ -19,20 +19,6 @@ if [ -z "$EDITOR" ]; then
     EDITOR=xedit
 fi
 
-case $PKG in
-    latex|latex-bin|cyrillic|cyrillic-bin)
-	# PKG=
-	# wget $MIRROR/$PKG.tar.xz
-	# tar Jxf $PKG.tar.xz
-	# SOURCES/tlpobj2spec.pl tlpkg/tlpobj/$PKG.tlpobj
-	# -- cut & paste update
-	echo "These texlive-$PKG needs to be manually updated!"
-	exit 1
-	;;
-    *)
-        ;;
-esac
-
 if [ ! -d ../texlive-$PKG ]; then
     echo "run (cd ..; abf get texlive-$PKG) first!"
     exit 1

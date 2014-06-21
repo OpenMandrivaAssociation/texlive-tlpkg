@@ -24,7 +24,6 @@ my %Tags = (
     'dviljk'	=>	"%rename tetex-dvilj, %rename texlive-dvilj",
     'dvips'	=>	"%rename tetex-dvips, %rename texlive-texmf-dvips",
     'xdvi'	=>	"%rename tetex-xdvi, %rename xdvik",
-    'latex'	=>	"%rename texlive-latex-bin",
     'context'	=>	"%rename texlive-texmf-contex",
     'scheme-tetex'=>	"%rename tetex, %rename texlive-dviutils",
     'metafont'	=>	"%rename tetex-mfwin, %rename texlive-mfwin",
@@ -41,11 +40,6 @@ my %System = (
     'lcdftypetools'=> 'lcdf-typetools',
     'psutils'	=>	'psutils',
     'tex4ht'	=>	'tex4ht',
-);
-# to be used when renaming/merging packages
-my %Requires = (
-    'latex-bin'	=>	"latex",
-    'latex-bin.bin'=>	"latex.bin",
 );
 # extra missing requires when translating tlpobj and adding rpm provides
 #my %ExtraRequires = (
@@ -160,9 +154,12 @@ my %quirk_epoch = (
     'collection-texinfo'			=>	1,
     'collection-xetex'				=>	1,
     'dvipdfmx-def'				=>	1,
+    'dvips'					=>	1,
+    'encxvlna'					=>	1,
     'endheads'					=>	1,
     'epstopdf'					=>	1,
     'euro-ce'					=>	1,
+    'exsheets'					=>	1,
     'francais-bst'				=>	1,
     'glossaries'				=>	1,
     'gost'					=>	1,
@@ -185,6 +182,7 @@ my %quirk_epoch = (
     'patgen'					=>	1,
     'preprint'					=>	1,
     'pst-tools'					=>	1,
+    'pstricks_calcnotes'			=>	1,
     'regexpatch'				=>	1,
     'sidenotes'					=>	1,
     'sttools'					=>	1,
@@ -259,6 +257,7 @@ my %quirk_provides_bin = (
     'convbkmk'			=>	1,
     'ctanify'			=>	1,
     'ctanupload'		=>	1,
+    'cyrillic-bin'		=>	1,
     'de-macro'			=>	1,
     'dosepsbin'			=>	1,
     'dtxgen'			=>	1,
@@ -286,6 +285,7 @@ my %quirk_provides_bin = (
     'lilyglyphs'		=>	1,
     'listbib'			=>	1,
     'listings-ext'		=>	1,
+    'lollipop'			=>	1,
     'ltxfileinfo'		=>	1,
     'ltximg'			=>	1,
     'lua2dox'			=>	1,
@@ -346,6 +346,7 @@ my %quirk_bin_files = (
     'context'			=>	"%{_bindir}/*\n",
     'convbkmk'			=>	"%{_bindir}/convbkmk\n",
     'ctanify'			=>	"%{_bindir}/ctanify\n",
+    'cyrillic-bin'		=>	"%{_bindir}/rubibtex\n%{_bindir}/rumakeindex\n",
     'ctanupload'		=>	"%{_bindir}/ctanupload\n",
     'de-macro'			=>	"%{_bindir}/de-macro\n",
     'dosepsbin'			=>	"%{_bindir}/dosepsbin\n",
@@ -378,6 +379,9 @@ my %quirk_bin_files = (
     'lilyglyphs'		=>	"%{_bindir}/lily-*\n",
     'listbib'			=>	"%{_bindir}/listbib\n",
     'listings-ext'		=>	"%{_bindir}/listings-ext.sh\n",
+    'lollipop'			=>	"%{_bindir}/lollipop
+%{_bindir}/lualollipop
+%{_bindir}/xelollipop\n",
     'ltxfileinfo'		=>	"%{_bindir}/ltxfileinfo\n",
     'ltximg'			=>	"%{_bindir}/ltximg\n",
     'lua2dox'			=>	"%{_bindir}/lua2dox_filter\n",
@@ -531,6 +535,11 @@ popd\n",
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/ctanupload/ctanupload.pl ctanupload
 popd\n",
+    'cyrillic-bin'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf %{_texmfdistdir}/scripts/texlive/rubibtex.sh rubibtex
+    ln -sf %{_texmfdistdir}/scripts/texlive/rumakeindex.sh rumakeindex
+popd\n",
     'de-macro'			=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/de-macro/de-macro de-macro
@@ -652,6 +661,12 @@ popd\n",
     'listings-ext'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
     ln -sf %{_texmfdistdir}/scripts/listings-ext/listings-ext.sh listings-ext.sh
+popd\n",
+    'lollipop'		=>	"mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+    ln -sf pdftex lollipop
+    ln -sf luatex lualollipop
+    ln -sf xetex xelollipop
 popd\n",
     'ltxfileinfo'		=>	"mkdir -p %{buildroot}%{_bindir}
 pushd %{buildroot}%{_bindir}
@@ -1229,22 +1244,11 @@ foreach my $requires ($tlpobj->depends()) {
 	    next;
 	}
     }
-    if (defined($Requires{$requires})) {
-	$requires = $Requires{$requires};
-    }
     unless (defined($required{$requires})) {
 	print("Requires:\ttexlive-$requires\n");
 	$required{$requires} = 1;
     }
 }
-#if ($ExtraRequires{$name}) {
-#    foreach (split(", ", $ExtraRequires{$name})) {
-#	unless (defined($required{$_})) {
-#	    $required{$_} = 1;
-#	    print("Requires:\ttexlive-$_\n");
-#	}
-#    }
-#}
 if ($Tags{$name}) {
     foreach (split(", ", $Tags{$name})) {
 	print("$_\n");
