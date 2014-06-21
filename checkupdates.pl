@@ -52,6 +52,10 @@ if ($options{'u'}) {
     }
 }
 
+# Check what is in svn
+my %namerev = (
+);
+
 my @dirlist = (
     "texlive-12many",
     "texlive-2up",
