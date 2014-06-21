@@ -2868,6 +2868,7 @@ my @remlist = (
     "texlive-misc",
     "texlive-misc209",
     "texlive-multi",
+    "texlive-obnov",
     "texlive-polyglot",
     "texlive-psafm",
     "texlive-pstricks-tutorial",
