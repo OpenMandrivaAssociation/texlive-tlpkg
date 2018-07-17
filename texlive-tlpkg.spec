@@ -26,9 +26,11 @@
 %define _texmf_with_system_tex4ht	0
 %define _texmf_with_system_teckit	0
 
+%bcond_with urpmi
+
 Name:		texlive-tlpkg
 Version:	20180108
-Release:	1
+Release:	2
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -71,12 +73,14 @@ free software, including support for many languages around the world.
 %dir %{_texmf_language_def_d}
 %dir %{_texmf_language_lua_d}
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
-%{_bindir}/tlmgr
-%{_sbindir}/tlmgr
 %{_sbindir}/texlive.post
 %{_sysconfdir}/rpm/macros.d/texlive.macros
+%if %{with urpmi}
+%{_bindir}/tlmgr
+%{_sbindir}/tlmgr
 %{_sysconfdir}/pam.d/tlmgr
 %{_sysconfdir}/console.apps/tlmgr
+%endif
 
 #-----------------------------------------------------------------------
 %prep
@@ -100,6 +104,7 @@ install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -D -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
 install -D -m644 %{SOURCE7} %{buildroot}/etc/rpm/macros.d/texlive.macros
 
+%if %{with urpmi}
 # install tlmgr like application
 install -D -m755 %{SOURCE8} %{buildroot}%{_sbindir}/tlmgr
 mkdir -p %{buildroot}%{_sysconfdir}/pam.d
@@ -113,3 +118,4 @@ SESSION=true
 EOF
 mkdir -p %{buildroot}%{_bindir}
 ln -sf %{_bindir}/consolehelper %{buildroot}%{_bindir}/tlmgr
+%endif
