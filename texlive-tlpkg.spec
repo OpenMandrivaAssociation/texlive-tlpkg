@@ -30,7 +30,7 @@
 
 Name:		texlive-tlpkg
 Version:	20180108
-Release:	2
+Release:	3
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
