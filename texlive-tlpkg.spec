@@ -30,7 +30,7 @@
 
 Name:		texlive-tlpkg
 Version:	20180108
-Release:	3
+Release:	4
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -40,7 +40,6 @@ Source1:	http://mirrors.ctan.org/systems/texlive/tlnet/tlpkg/texlive.tlpdb.xz
 Source2:	tlpobj2spec.pl
 Source3:	fmtutil-hdr.cnf
 Source4:	updmap-hdr.cfg
-Source5:	texlive.post
 Source6:	checkupdates.pl
 Source7:	texlive.macros
 Source8:	tlmgr
@@ -54,7 +53,6 @@ Requires:	perl-XML-XPath
     if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
 	cp -f %{_texmfdistdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
     fi
-    %{_sbindir}/texlive.post
 
 %description
 TeX Live is an easy way to get up and running with the TeX document
@@ -73,14 +71,32 @@ free software, including support for many languages around the world.
 %dir %{_texmf_language_def_d}
 %dir %{_texmf_language_lua_d}
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
-%{_sbindir}/texlive.post
-%{_sysconfdir}/rpm/macros.d/texlive.macros
+%{_rpmmacrodir}/macros.texlive
 %if %{with urpmi}
 %{_bindir}/tlmgr
 %{_sbindir}/tlmgr
 %{_sysconfdir}/pam.d/tlmgr
 %{_sysconfdir}/console.apps/tlmgr
 %endif
+
+%transfiletriggerin -- /usr/share/texmf-dist
+if [ -x "/usr/bin/mktexlsr" ]
+then
+    /usr/bin/mktexlsr 2>/dev/null 1>&2 || :
+    if [ -x "/usr/bin/updmap-sys" ]
+    then
+	echo Y | /usr/bin/updmap-sys --syncwithtrees 2>/dev/null 1>&2 || :
+    fi
+    if [ -x "/usr/bin/mtxrun" ]
+    then
+	/usr/bin/mtxrun --generate 2>/dev/null 1>&2 || :
+    fi
+    if [ -x "/usr/bin/fmtutil-sys" ]
+    then
+	/usr/bin/fmtutil-sys --all 2>/dev/null 1>&2 || :
+    fi
+fi
+
 
 #-----------------------------------------------------------------------
 %prep
@@ -101,8 +117,7 @@ mkdir -p %{buildroot}%{_texmf_language_lua_d}
 install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdistdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdistdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
-install -D -m755 %{SOURCE5} %{buildroot}%{_sbindir}/texlive.post
-install -D -m644 %{SOURCE7} %{buildroot}/etc/rpm/macros.d/texlive.macros
+install -D -m644 %{SOURCE7} %{buildroot}%{_rpmmacrodir}/macros.texlive
 
 %if %{with urpmi}
 # install tlmgr like application
