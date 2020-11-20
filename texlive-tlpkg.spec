@@ -71,11 +71,11 @@ free software, including support for many languages around the world.
 %dir %{_texmf_language_def_d}
 %dir %{_texmf_language_lua_d}
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
+%{_sbindir}/texlive.post
 %{_rpmmacrodir}/macros.texlive
 %if %{with urpmi}
 %{_bindir}/tlmgr
 %{_sbindir}/tlmgr
-%{_sbindir}/texlive.post
 %{_sysconfdir}/pam.d/tlmgr
 %{_sysconfdir}/console.apps/tlmgr
 %endif
