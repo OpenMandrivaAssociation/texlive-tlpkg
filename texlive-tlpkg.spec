@@ -30,7 +30,7 @@
 
 Name:		texlive-tlpkg
 Version:	20180108
-Release:	4
+Release:	5
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -75,6 +75,7 @@ free software, including support for many languages around the world.
 %if %{with urpmi}
 %{_bindir}/tlmgr
 %{_sbindir}/tlmgr
+%{_sbindir}/texlive.post
 %{_sysconfdir}/pam.d/tlmgr
 %{_sysconfdir}/console.apps/tlmgr
 %endif
@@ -118,6 +119,11 @@ install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdistdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdistdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -D -m644 %{SOURCE7} %{buildroot}%{_rpmmacrodir}/macros.texlive
+
+# (tpg) fugly workaround for tons of texlive patches that still uses %post and call texlive.post binary
+mkdir -p %{buildroot}%{_sbindir}
+echo "#!/bin/true" > %{buildroot}%{_sbindir}/texlive.post
+chmod 755 %{buildroot}%{_sbindir}/texlive.post
 
 %if %{with urpmi}
 # install tlmgr like application
