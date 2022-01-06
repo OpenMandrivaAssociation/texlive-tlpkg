@@ -14,7 +14,7 @@
 %_texmf_language_lua_d          /usr/share/tlpkg/language.lua.d
 
 %_texmf_enable_asymptote        0
-%_texmf_enable_biber		0
+%_texmf_enable_biber            0
 %_texmf_enable_xindy            0
 %_texmf_with_system_dialog      1
 %_texmf_with_system_lcdf        0
