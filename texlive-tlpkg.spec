@@ -27,8 +27,8 @@
 %define _texmf_with_system_teckit 0
 
 Name:		texlive-tlpkg
-Version:	20180108
-Release:	6
+Version:	20221118
+Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -46,6 +46,8 @@ BuildArch:	noarch
 Requires:	perl-Proc-Daemon
 Requires:	perl-Proc-PID-File
 Requires:	perl-XML-XPath
+
+Provides:	%{_sbindir}/texlive.post
 
 %post
 if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
