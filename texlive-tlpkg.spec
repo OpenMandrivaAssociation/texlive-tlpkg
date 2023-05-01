@@ -27,8 +27,8 @@
 %define _texmf_with_system_teckit 0
 
 Name:		texlive-tlpkg
-Version:	20221118
-Release:	2
+Version:	20230430
+Release:	1
 Summary:	The TeX formatting system
 URL:		http://tug.org/texlive/
 Group:		Publishing
@@ -51,7 +51,8 @@ Provides:	%{_sbindir}/texlive.post
 
 %post
 if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
-    cp -f %{_texmfdistdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
+	mkdir -p %{_texmfconfdir}/web2c
+	cp -f %{_texmfdistdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
 fi
 
 %description
