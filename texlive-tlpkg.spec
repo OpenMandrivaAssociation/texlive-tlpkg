@@ -30,7 +30,7 @@ Name:		texlive-tlpkg
 Version:	20230430
 Release:	1
 Summary:	The TeX formatting system
-URL:		http://tug.org/texlive/
+URL:		https://tug.org/texlive/
 Group:		Publishing
 License:	http://www.tug.org/texlive/LICENSE.TL
 Source0:	http://mirrors.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
