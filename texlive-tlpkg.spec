@@ -27,7 +27,7 @@
 %define _texmf_with_system_teckit 0
 
 Name:		texlive-tlpkg
-Version:	20230430
+Version:	20260709
 Release:	1
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
@@ -41,6 +41,8 @@ Source4:	updmap-hdr.cfg
 Source6:	checkupdates.pl
 Source7:	texlive.macros
 Source8:	tlmgr
+Source9:	macros.buildsys.texlive
+Source10:	texlive-generate-files-specpart
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -74,6 +76,8 @@ free software, including support for many languages around the world.
 %ghost %{_texmfconfdir}/web2c/updmap.cfg
 %{_sbindir}/texlive.post
 %{_rpmmacrodir}/macros.texlive
+%{_rpmmacrodir}/macros.buildsys.texlive
+%{_rpmconfigdir}/texlive-generate-files-specpart
 
 %transfiletriggerin -P 20 -- %{_texmfdir} %{_texmfdistdir} %{_texmflocaldir} %{_texmffontsdir}
 if [ -x "/usr/bin/mktexlsr" ]; then
@@ -110,6 +114,8 @@ install -D -m644 %{SOURCE3} %{buildroot}%{_texmfdistdir}/web2c/fmtutil-hdr.cnf
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfdistdir}/web2c/updmap-hdr.cfg
 install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -D -m644 %{SOURCE7} %{buildroot}%{_rpmmacrodir}/macros.texlive
+install -D -m644 %{SOURCE9} %{buildroot}%{_rpmmacrodir}/macros.buildsys.texlive
+install -D -m755 %{SOURCE10} %{buildroot}%{_rpmconfigdir}/texlive-generate-files-specpart
 
 # (tpg) fugly workaround for tons of texlive patches that still uses %post and call texlive.post binary
 mkdir -p %{buildroot}%{_sbindir}
