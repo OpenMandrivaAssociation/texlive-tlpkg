@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	1
+Release:	2
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing
@@ -50,6 +50,7 @@ Requires:	perl-Proc-PID-File
 Requires:	perl-XML-XPath
 
 Provides:	%{_sbindir}/texlive.post
+Provides:	rpm-build(texlive)
 
 %post
 if [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
