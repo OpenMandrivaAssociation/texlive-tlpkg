@@ -65,14 +65,26 @@ if [ -d %{buildroot}%{_texmfdistdir}/bin ]; then \
 	find %{buildroot}%{_texmfdistdir}/bin \\( -type f -o -type l \\) -exec mv -f {} %{buildroot}%{_bindir}/ \\; \
 	rm -rf %{buildroot}%{_texmfdistdir}/bin \
 fi \
+# OM policy: do not ship prebuilt native binaries not built from source. \
+# TL modules are noarch; upstream sometimes leaves helper ELFs under doc/ \
+# (e.g. opbible txs-gen/mod2tex). Keep accompanying sources (*.cpp, \
+# Makefile, scripts) so users can build tools themselves. \
+find %{buildroot} -type f -print0 2>/dev/null | while IFS= read -r -d '' f; do \
+	case "$(file -b "$f" 2>/dev/null)" in \
+		*ELF*|*PE32*|*PE32+*|*Mach-O*) \
+			echo "texlive-buildsys: stripping prebuilt binary $f" \
+			rm -f "$f" \
+			;; \
+	esac \
+done \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
 
 %buildsystem_texlive_check() \
 %{nil}
 
-# Common requires for every texlive-* module
-# (literal space after colon — in rpm macros \t is an escaped "t", not a tab)
+# Legacy helper — do not use in new specs. Filetriggers on texlive-tlpkg do
+# not require a runtime Requires from each module; BuildSystem BR is
+# rpm-build(texlive) (auto). Kept as empty for any old specs still calling it.
 %texlive_base_requires() \
-Requires(pre): texlive-tlpkg\
 %{nil}
