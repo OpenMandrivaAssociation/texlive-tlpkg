@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	4
+Release:	5
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing

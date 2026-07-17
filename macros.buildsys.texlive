@@ -66,16 +66,20 @@ if [ -d %{buildroot}%{_texmfdistdir}/bin ]; then \
 	rm -rf %{buildroot}%{_texmfdistdir}/bin \
 fi \
 # OM policy: do not ship prebuilt native binaries not built from source. \
-# TL modules are noarch; upstream sometimes leaves helper ELFs under doc/ \
-# (e.g. opbible txs-gen/mod2tex). Keep accompanying sources (*.cpp, \
-# Makefile, scripts) so users can build tools themselves. \
-find %{buildroot} -type f -print0 2>/dev/null | while IFS= read -r -d '' f; do \
-	case "$(file -b "$f" 2>/dev/null)" in \
-		*ELF*|*PE32*|*PE32+*|*Mach-O*) \
-			echo "texlive-buildsys: stripping prebuilt binary $f" \
-			rm -f "$f" \
-			;; \
-	esac \
+# TL modules are noarch; upstream sometimes leaves helper ELFs under the \
+# texmf tree (e.g. opbible doc/.../txs-gen/mod2tex, x86_64-only). Only \
+# strip under texmf paths — never under %{_bindir}, so arch-specific tools \
+# built from source during %%build and installed to bindir are kept. \
+for _td in %{buildroot}%{_texmfdistdir} %{buildroot}%{_texmfdir}; do \
+	[ -d "$_td" ] || continue \
+	find "$_td" -type f -print0 2>/dev/null | while IFS= read -r -d '' f; do \
+		case "$(file -b "$f" 2>/dev/null)" in \
+			*ELF*|*PE32*|*PE32+*|*Mach-O*) \
+				echo "texlive-buildsys: stripping prebuilt binary $f" \
+				rm -f "$f" \
+				;; \
+		esac \
+	done \
 done \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
