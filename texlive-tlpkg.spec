@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	5
+Release:	6
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing
@@ -43,6 +43,10 @@ Source7:	texlive.macros
 Source8:	tlmgr
 Source9:	macros.buildsys.texlive
 Source10:	texlive-generate-files-specpart
+Source11:	texlive-generate-bin-specparts
+Source12:	texlive-fixup-bindir
+Source13:	texlive-engine-links.map
+Source14:	texlive-bindir-remove.map
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -77,6 +81,11 @@ free software, including support for many languages around the world.
 %{_rpmmacrodir}/macros.texlive
 %{_rpmmacrodir}/macros.buildsys.texlive
 %{_rpmconfigdir}/texlive-generate-files-specpart
+%{_rpmconfigdir}/texlive-generate-bin-specparts
+%{_rpmconfigdir}/texlive-fixup-bindir
+%{_rpmconfigdir}/texlive-engine-links.map
+%{_rpmconfigdir}/texlive-bindir-remove.map
+%{_tlpkgdir}/texlive.tlpdb.xz
 
 %transfiletriggerin -P 20 -- %{_texmfdir} %{_texmfdistdir} %{_texmflocaldir} %{_texmffontsdir}
 if [ -x "/usr/bin/mktexlsr" ]; then
@@ -115,6 +124,12 @@ install -D -m644 %{SOURCE4} %{buildroot}%{_texmfconfdir}/web2c/updmap.cfg
 install -D -m644 %{SOURCE7} %{buildroot}%{_rpmmacrodir}/macros.texlive
 install -D -m644 %{SOURCE9} %{buildroot}%{_rpmmacrodir}/macros.buildsys.texlive
 install -D -m755 %{SOURCE10} %{buildroot}%{_rpmconfigdir}/texlive-generate-files-specpart
+install -D -m755 %{SOURCE11} %{buildroot}%{_rpmconfigdir}/texlive-generate-bin-specparts
+install -D -m755 %{SOURCE12} %{buildroot}%{_rpmconfigdir}/texlive-fixup-bindir
+install -D -m644 %{SOURCE13} %{buildroot}%{_rpmconfigdir}/texlive-engine-links.map
+install -D -m644 %{SOURCE14} %{buildroot}%{_rpmconfigdir}/texlive-bindir-remove.map
+# tlpdb for monorepo texlive bin packaging (BuildRequires: texlive-tlpkg)
+install -D -m644 %{SOURCE1} %{buildroot}%{_tlpkgdir}/texlive.tlpdb.xz
 
 # (tpg) fugly workaround for tons of texlive patches that still uses %post and call texlive.post binary
 mkdir -p %{buildroot}%{_sbindir}

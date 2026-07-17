@@ -81,6 +81,22 @@ for _td in %{buildroot}%{_texmfdistdir} %{buildroot}%{_texmfdir}; do \
 		esac \
 	done \
 done \
+# Declarative bindir wrappers (script/engine aliases). Set in the module \
+# spec as: %%global tl_bin_links name:target name2:target2 \
+# target is a sibling basename (pdftex) or an absolute/macro path \
+# (%%{_texmfdistdir}/scripts/...). Never install prebuilt ELFs here. \
+if [ -n "%{?tl_bin_links}" ]; then \
+	mkdir -p %{buildroot}%{_bindir} \
+	for _pair in %{tl_bin_links}; do \
+		_name=${_pair%%:*} \
+		_target=${_pair#*:} \
+		if [ -z "$_name" ] || [ -z "$_target" ] || [ "$_name" = "$_pair" ]; then \
+			echo "texlive-buildsys: bad tl_bin_links entry: $_pair" >&2 \
+			exit 1 \
+		fi \
+		ln -sfn "$_target" %{buildroot}%{_bindir}/"$_name" \
+	done \
+fi \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
 

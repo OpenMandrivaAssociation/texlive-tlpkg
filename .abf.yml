@@ -1,3 +1,15 @@
 sources:
   install-tl-unx.tar.gz: b21de097f6daec644b9ba88ca4ec376ed0185120
   texlive.tlpdb.xz: f8048274b24160ba9023a809777be78fe3d54ba3
+  tlpobj2spec.pl: d70f9c3bd3e513a4a403cad054cefd7decf252dc
+  fmtutil-hdr.cnf: 77b2fd6239fb19dbf3bbf959b80922473718a887
+  updmap-hdr.cfg: 8ec215408f0e5238bff4eb956d2e0294e5170e39
+  checkupdates.pl: 2f729622c1533c99650923a951c80403b6132fb3
+  texlive.macros: d220a1f1b3e5d9e374727d61a169b3f7e73f340e
+  tlmgr: 2337857ace4c8bfc83c9f30aef2bb848c138c2c2
+  macros.buildsys.texlive: 171f404a8a0ca5656508a3e550ecfc23f4df0965
+  texlive-generate-files-specpart: d9afd2cf25421ffe0a9918dac65c857f0e18157c
+  texlive-generate-bin-specparts: a669fa994e9974f9e5e6622dae4cc58847638c74
+  texlive-fixup-bindir: eaf46aff41301591ccc7f7f037b165bdbdc17526
+  texlive-engine-links.map: f2fa64eceecd2c9b40a885aa9ac0f6501b374ca1
+  texlive-bindir-remove.map: 448fe8aca9a84904aad3d79467fe5fcd17a84766
