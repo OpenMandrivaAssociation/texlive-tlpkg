@@ -75,17 +75,12 @@ fi \
 for _td in %{buildroot}%{_texmfdistdir} %{buildroot}%{_texmfdir}; do \
 	[ -d "$_td" ] || continue \
 	find "$_td" -type f -print0 2>/dev/null | while IFS= read -r -d '' f; do \
-		_magic=$(head -c 4 "$f" 2>/dev/null || true) \
+		# Hex magic via od (survives RPM macro expansion; no need for $'\\177' etc.) \
+		_hex=$(od -An -tx1 -N4 "$f" 2>/dev/null | tr -d '[:space:]') \
 		_strip= \
-		# ELF: 0x7f E L F \
-		if [ "$_magic" = $'\177ELF' ]; then _strip=1; fi \
-		# PE/COFF (Windows): starts with M Z \
-		case "$_magic" in \
-			MZ*) _strip=1 ;; \
-		esac \
-		# Mach-O 32/64 / fat (first 4 bytes as hex) \
-		_hex=$(printf '%s' "$_magic" | od -An -tx1 2>/dev/null | tr -d ' \n') \
 		case "$_hex" in \
+			7f454c46) _strip=1 ;; \
+			4d5a*) _strip=1 ;; \
 			feedface|cefaedfe|feedfacf|cffaedfe|cafebabe|bebafeca) _strip=1 ;; \
 		esac \
 		# `file` as a secondary signal when available \
