@@ -79,9 +79,11 @@ for _td in %{buildroot}%{_texmfdistdir} %{buildroot}%{_texmfdir}; do \
 		_strip= \
 		# ELF: 0x7f E L F \
 		if [ "$_magic" = $'\177ELF' ]; then _strip=1; fi \
-		# PE/COFF (Windows): M Z \
-		if [ "$_magic" = 'MZ' ] || [ "$_magic" = $'MZ\0\0' ]; then _strip=1; fi \
-		# Mach-O 32/64 / fat (first 4 bytes as big-endian magic) \
+		# PE/COFF (Windows): starts with M Z \
+		case "$_magic" in \
+			MZ*) _strip=1 ;; \
+		esac \
+		# Mach-O 32/64 / fat (first 4 bytes as hex) \
 		_hex=$(printf '%s' "$_magic" | od -An -tx1 2>/dev/null | tr -d ' \n') \
 		case "$_hex" in \
 			feedface|cefaedfe|feedfacf|cffaedfe|cafebabe|bebafeca) _strip=1 ;; \
