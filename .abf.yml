@@ -7,7 +7,7 @@ sources:
   checkupdates.pl: 2f729622c1533c99650923a951c80403b6132fb3
   texlive.macros: d220a1f1b3e5d9e374727d61a169b3f7e73f340e
   tlmgr: 2337857ace4c8bfc83c9f30aef2bb848c138c2c2
-  macros.buildsys.texlive: 171f404a8a0ca5656508a3e550ecfc23f4df0965
+  macros.buildsys.texlive: ab9094175a5ffe667750167dd841134ac91465b9
   texlive-generate-files-specpart: d9afd2cf25421ffe0a9918dac65c857f0e18157c
   texlive-generate-bin-specparts: a669fa994e9974f9e5e6622dae4cc58847638c74
   texlive-fixup-bindir: eaf46aff41301591ccc7f7f037b165bdbdc17526
