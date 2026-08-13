@@ -111,6 +111,22 @@ if [ -n "%{?tl_bin_links}" ]; then \
 		ln -sfn "$_target" %{buildroot}%{_bindir}/"$_name" \
 	done \
 fi \
+# Distro layout: engines live in %{_bindir} (/usr/bin), not under a TL \
+# year tree. Upstream texmf.cnf sets TEXMFROOT=$SELFAUTOPARENT which is \
+# "/" for /usr/bin/* — break path search and fmtutil (@INC looks under \
+# //tlpkg). Rewrite core trees to OpenMandriva locations when present. \
+_cnf="%{buildroot}%{_texmfdistdir}/web2c/texmf.cnf" \
+if [ -f "$_cnf" ]; then \
+	perl -pi -e ' \
+		s|^(TEXMFROOT\s*=\s*).*|$1%{_datadir}|; \
+		s|^(TEXMFDIST\s*=\s*).*|$1%{_texmfdistdir}|; \
+		s|^(TEXMFMAIN\s*=\s*).*|$1%{_texmfdistdir}|; \
+		s|^(TEXMFLOCAL\s*=\s*).*|$1%{_texmflocaldir}|; \
+		s|^(TEXMFSYSVAR\s*=\s*).*|$1%{_texmfvardir}|; \
+		s|^(TEXMFSYSCONFIG\s*=\s*).*|$1%{_texmfconfdir}|; \
+		s|^(OSFONTDIR\s*=\s*).*|$1%{_datadir}/fonts|; \
+	' "$_cnf" \
+fi \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
 
