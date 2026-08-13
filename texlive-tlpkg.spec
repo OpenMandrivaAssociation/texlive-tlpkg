@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	11
+Release:	12
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing
@@ -47,6 +47,7 @@ Source11:	texlive-generate-bin-specparts
 Source12:	texlive-fixup-bindir
 Source13:	texlive-engine-links.map
 Source14:	texlive-bindir-remove.map
+Source15:	texlive-rebuild-hyphen
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -89,7 +90,19 @@ free software, including support for many languages around the world.
 %{_rpmconfigdir}/texlive-fixup-bindir
 %{_rpmconfigdir}/texlive-engine-links.map
 %{_rpmconfigdir}/texlive-bindir-remove.map
+%{_rpmconfigdir}/texlive-rebuild-hyphen
 %{_tlpkgdir}/texlive.tlpdb.xz
+
+# Rebuild language.dat/def/lua when hyphen language drop-ins appear or vanish.
+%transfiletriggerin -P 15 -- %{_texmf_language_dat_d} %{_texmf_language_def_d} %{_texmf_language_lua_d}
+if [ -x "%{_rpmconfigdir}/texlive-rebuild-hyphen" ]; then
+	%{_rpmconfigdir}/texlive-rebuild-hyphen || :
+fi
+
+%transfiletriggerpostun -P 15 -- %{_texmf_language_dat_d} %{_texmf_language_def_d} %{_texmf_language_lua_d}
+if [ -x "%{_rpmconfigdir}/texlive-rebuild-hyphen" ]; then
+	%{_rpmconfigdir}/texlive-rebuild-hyphen || :
+fi
 
 %transfiletriggerin -P 20 -- %{_texmfdir} %{_texmfdistdir} %{_texmflocaldir} %{_texmffontsdir}
 if [ -x "/usr/bin/mktexlsr" ]; then
@@ -132,6 +145,7 @@ install -D -m755 %{SOURCE11} %{buildroot}%{_rpmconfigdir}/texlive-generate-bin-s
 install -D -m755 %{SOURCE12} %{buildroot}%{_rpmconfigdir}/texlive-fixup-bindir
 install -D -m644 %{SOURCE13} %{buildroot}%{_rpmconfigdir}/texlive-engine-links.map
 install -D -m644 %{SOURCE14} %{buildroot}%{_rpmconfigdir}/texlive-bindir-remove.map
+install -D -m755 %{SOURCE15} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-hyphen
 # tlpdb for monorepo texlive bin packaging (BuildRequires: texlive-tlpkg)
 install -D -m644 %{SOURCE1} %{buildroot}%{_tlpkgdir}/texlive.tlpdb.xz
 
