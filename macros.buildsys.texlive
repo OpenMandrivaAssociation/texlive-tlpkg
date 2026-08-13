@@ -127,6 +127,19 @@ if [ -f "$_cnf" ]; then \
 		s|^(OSFONTDIR\s*=\s*).*|$1%{_datadir}/fonts|; \
 	' "$_cnf" \
 fi \
+# hyphen-base ships a full language.dat listing every TL hyphen package. \
+# Partial installs then fail format generation on missing loadhyph-*.tex. \
+# Keep only the English base (language.us*); extra languages belong in \
+# %%{_texmf_language_dat_d} fragments assembled by filetriggers later. \
+_lcfg="%{buildroot}%{_texmfdistdir}/tex/generic/config" \
+if [ -d "$_lcfg" ]; then \
+	[ -f "$_lcfg/language.us" ] && [ -f "$_lcfg/language.dat" ] && \
+		cp -f "$_lcfg/language.us" "$_lcfg/language.dat" \
+	[ -f "$_lcfg/language.us.def" ] && [ -f "$_lcfg/language.def" ] && \
+		cp -f "$_lcfg/language.us.def" "$_lcfg/language.def" \
+	[ -f "$_lcfg/language.us.lua" ] && [ -f "$_lcfg/language.dat.lua" ] && \
+		cp -f "$_lcfg/language.us.lua" "$_lcfg/language.dat.lua" \
+fi \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
 
