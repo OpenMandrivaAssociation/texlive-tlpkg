@@ -140,6 +140,15 @@ if [ -d "$_lcfg" ]; then \
 	[ -f "$_lcfg/language.us.lua" ] && [ -f "$_lcfg/language.dat.lua" ] && \
 		cp -f "$_lcfg/language.us.lua" "$_lcfg/language.dat.lua" \
 fi \
+# texlive-scripts ships a full updmap.cfg listing every TL map. Partial \
+# installs then have Map lines for missing files; --syncwithtrees comments \
+# them into /etc and those #! lines override enabled maps. Strip the \
+# catalogue; live Map lines come from %%{_texmf_updmap_d} via filetrigger. \
+_ucfg="%{buildroot}%{_texmfdistdir}/web2c/updmap.cfg" \
+if [ -f "$_ucfg" ]; then \
+	awk '!/^(Map|MixedMap|KanjiMap)[[:space:]]/ && !/^#![[:space:]]+(Map|MixedMap|KanjiMap)[[:space:]]/' \
+		"$_ucfg" > "$_ucfg.hdr" && mv -f "$_ucfg.hdr" "$_ucfg" \
+fi \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
 
