@@ -115,16 +115,20 @@ fi \
 # year tree. Upstream texmf.cnf sets TEXMFROOT=$SELFAUTOPARENT which is \
 # "/" for /usr/bin/* — break path search and fmtutil (@INC looks under \
 # //tlpkg). Rewrite core trees to OpenMandriva locations when present. \
+# Also drop !! on TEXMF/TEXMFDBS: that prefix means "ls-R only, never \
+# search the disk", so a missing or stale ls-R in mock makes every .sty \
+# lookup fail even though the files are installed. \
 _cnf="%{buildroot}%{_texmfdistdir}/web2c/texmf.cnf" \
 if [ -f "$_cnf" ]; then \
 	perl -pi -e ' \
-		s|^(TEXMFROOT\s*=\s*).*|$1%{_datadir}|; \
-		s|^(TEXMFDIST\s*=\s*).*|$1%{_texmfdistdir}|; \
-		s|^(TEXMFMAIN\s*=\s*).*|$1%{_texmfdistdir}|; \
-		s|^(TEXMFLOCAL\s*=\s*).*|$1%{_texmflocaldir}|; \
-		s|^(TEXMFSYSVAR\s*=\s*).*|$1%{_texmfvardir}|; \
-		s|^(TEXMFSYSCONFIG\s*=\s*).*|$1%{_texmfconfdir}|; \
-		s|^(OSFONTDIR\s*=\s*).*|$1%{_datadir}/fonts|; \
+		s|^(TEXMFROOT[[:space:]]*=[[:space:]]*).*|$1%{_datadir}|; \
+		s|^(TEXMFDIST[[:space:]]*=[[:space:]]*).*|$1%{_texmfdistdir}|; \
+		s|^(TEXMFMAIN[[:space:]]*=[[:space:]]*).*|$1%{_texmfdistdir}|; \
+		s|^(TEXMFLOCAL[[:space:]]*=[[:space:]]*).*|$1%{_texmflocaldir}|; \
+		s|^(TEXMFSYSVAR[[:space:]]*=[[:space:]]*).*|$1%{_texmfvardir}|; \
+		s|^(TEXMFSYSCONFIG[[:space:]]*=[[:space:]]*).*|$1%{_texmfconfdir}|; \
+		s|^(OSFONTDIR[[:space:]]*=[[:space:]]*).*|$1%{_datadir}/fonts|; \
+		s/!!//g if /^(TEXMF|TEXMFDBS)[[:space:]]*=/; \
 	' "$_cnf" \
 fi \
 # hyphen-base ships a full language.dat listing every TL hyphen package. \

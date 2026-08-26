@@ -57,7 +57,9 @@ if [ -x /usr/bin/updmap-sys ]; then
 	/usr/bin/updmap-sys --force >/dev/null 2>&1 || :
 fi
 
-if [ -x /usr/bin/mktexlsr ]; then
+if [ -x /usr/lib/rpm/texlive-rebuild-lsr ]; then
+	/usr/lib/rpm/texlive-rebuild-lsr || :
+elif [ -x /usr/bin/mktexlsr ]; then
 	/usr/bin/mktexlsr /var/lib/texmf >/dev/null 2>&1 || :
 fi
 

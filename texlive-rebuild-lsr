@@ -1,0 +1,51 @@
+#!/bin/bash
+# Rebuild kpathsea ls-R filename databases for the distro TeX trees.
+#
+# Invoked by texlive-tlpkg filetriggers when files appear under a texmf
+# tree. Two mock/first-install traps this has to avoid:
+#
+# 1. Upstream texmf.cnf sets TEXMFROOT=$SELFAUTOPARENT. Engines live in
+#    /usr/bin, so that expands to "/" and kpsewhich looks in /texmf-dist
+#    instead of /usr/share/texmf-dist. Rewrite the live file if it is
+#    still the upstream default (no-op once texlive-kpathsea is rebuilt
+#    with BuildSystem: texlive).
+# 2. mktexlsr with no arguments asks kpsewhich for TEXMFDBS. If that
+#    lookup is empty or points at the "/" trees, it exits 0 and writes
+#    nothing. Always pass explicit distro trees.
+set -u
+
+CNF="${TEXMFDIST:-/usr/share/texmf-dist}/web2c/texmf.cnf"
+if [ -f "$CNF" ] && grep -q '^TEXMFROOT[[:space:]]*=[[:space:]]*\$SELFAUTOPARENT' "$CNF"; then
+	sed -i \
+		-e 's|^TEXMFROOT[[:space:]]*=.*|TEXMFROOT = /usr/share|' \
+		-e 's|^TEXMFDIST[[:space:]]*=.*|TEXMFDIST = /usr/share/texmf-dist|' \
+		-e 's|^TEXMFMAIN[[:space:]]*=.*|TEXMFMAIN = /usr/share/texmf-dist|' \
+		-e 's|^TEXMFLOCAL[[:space:]]*=.*|TEXMFLOCAL = /usr/share/texmf-local|' \
+		-e 's|^TEXMFSYSVAR[[:space:]]*=.*|TEXMFSYSVAR = /var/lib/texmf|' \
+		-e 's|^TEXMFSYSCONFIG[[:space:]]*=.*|TEXMFSYSCONFIG = /etc/texmf|' \
+		-e 's|^OSFONTDIR[[:space:]]*=.*|OSFONTDIR = /usr/share/fonts|' \
+		-e '/^TEXMF[[:space:]]*=/s/!!//g' \
+		-e '/^TEXMFDBS[[:space:]]*=/s/!!//g' \
+		"$CNF" || :
+fi
+
+MKTEXLSR="${MKTEXLSR:-/usr/bin/mktexlsr}"
+[ -x "$MKTEXLSR" ] || exit 0
+
+trees=()
+for d in \
+	/usr/share/texmf-dist \
+	/usr/share/texmf \
+	/usr/share/texmf-local \
+	/usr/share/texmf-fonts \
+	/etc/texmf \
+	/var/lib/texmf
+do
+	[ -d "$d" ] || continue
+	trees+=("$d")
+done
+[ "${#trees[@]}" -gt 0 ] || exit 0
+
+# Discard stdout; keep going if a single tree is unwritable.
+"$MKTEXLSR" "${trees[@]}" >/dev/null || :
+exit 0

@@ -13,5 +13,6 @@ sources:
   texlive-engine-links.map: f2fa64eceecd2c9b40a885aa9ac0f6501b374ca1
   texlive-bindir-remove.map: 448fe8aca9a84904aad3d79467fe5fcd17a84766
   texlive-rebuild-hyphen: a35ed5efc7e58a82f849f9fda2c4eece16f3ce06
-  texlive-rebuild-maps: 0ac10aae2b3e2b53170f8ba14240de6162cd31d7
-  macros.buildsys.texlive: b974b63338fb9e90ccb08dbec2888f6f5dedb9ad
+  texlive-rebuild-maps: cdeb454606afa14d3de6838e6ab0c2850ea17603
+  macros.buildsys.texlive: cd91249d4c5170f058999920d1a095dc02b76f64
+  texlive-rebuild-lsr: 23dc67245bba516dd29060db35d74ecaf614f131

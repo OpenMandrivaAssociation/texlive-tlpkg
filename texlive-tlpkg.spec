@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	13
+Release:	14
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing
@@ -49,6 +49,7 @@ Source13:	texlive-engine-links.map
 Source14:	texlive-bindir-remove.map
 Source15:	texlive-rebuild-hyphen
 Source16:	texlive-rebuild-maps
+Source17:	texlive-rebuild-lsr
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -66,6 +67,9 @@ if [ -x %{_rpmconfigdir}/texlive-rebuild-maps ]; then
 elif [ ! -f %{_texmfconfdir}/web2c/updmap.cfg ]; then
 	mkdir -p %{_texmfconfdir}/web2c
 	cp -f %{_texmfdistdir}/web2c/updmap-hdr.cfg %{_texmfconfdir}/web2c/updmap.cfg
+fi
+if [ -x %{_rpmconfigdir}/texlive-rebuild-lsr ]; then
+	%{_rpmconfigdir}/texlive-rebuild-lsr || :
 fi
 
 %description
@@ -95,6 +99,7 @@ free software, including support for many languages around the world.
 %{_rpmconfigdir}/texlive-bindir-remove.map
 %{_rpmconfigdir}/texlive-rebuild-hyphen
 %{_rpmconfigdir}/texlive-rebuild-maps
+%{_rpmconfigdir}/texlive-rebuild-lsr
 %{_tlpkgdir}/texlive.tlpdb.xz
 
 # Rebuild language.dat/def/lua when hyphen language drop-ins appear or vanish.
@@ -119,15 +124,18 @@ if [ -x "%{_rpmconfigdir}/texlive-rebuild-maps" ]; then
 	%{_rpmconfigdir}/texlive-rebuild-maps || :
 fi
 
-%transfiletriggerin -P 20 -- %{_texmfdir} %{_texmfdistdir} %{_texmflocaldir} %{_texmffontsdir}
-if [ -x "/usr/bin/mktexlsr" ]; then
-    /usr/bin/mktexlsr 2>/dev/null 1>&2 || :
-    if [ -x "/usr/bin/mtxrun" ]; then
-	/usr/bin/mtxrun --generate 2>/dev/null 1>&2 || :
-    fi
-    if [ -x "/usr/bin/fmtutil-sys" ]; then
-	/usr/bin/fmtutil-sys --all 2>/dev/null 1>&2 || :
-    fi
+# Rebuild ls-R when files appear or vanish under a texmf tree. Pass
+# explicit directories via texlive-rebuild-lsr: bare mktexlsr asks
+# kpsewhich for TEXMFDBS and writes nothing if that lookup is empty
+# (typical in mock / first install).
+%transfiletriggerin -P 20 -- %{_texmfdir} %{_texmfdistdir} %{_texmflocaldir} %{_texmffontsdir} %{_texmfconfdir} %{_texmfvardir}
+if [ -x "%{_rpmconfigdir}/texlive-rebuild-lsr" ]; then
+	%{_rpmconfigdir}/texlive-rebuild-lsr || :
+fi
+
+%transfiletriggerpostun -P 20 -- %{_texmfdir} %{_texmfdistdir} %{_texmflocaldir} %{_texmffontsdir} %{_texmfconfdir} %{_texmfvardir}
+if [ -x "%{_rpmconfigdir}/texlive-rebuild-lsr" ]; then
+	%{_rpmconfigdir}/texlive-rebuild-lsr || :
 fi
 
 #-----------------------------------------------------------------------
@@ -159,6 +167,7 @@ install -D -m644 %{SOURCE13} %{buildroot}%{_rpmconfigdir}/texlive-engine-links.m
 install -D -m644 %{SOURCE14} %{buildroot}%{_rpmconfigdir}/texlive-bindir-remove.map
 install -D -m755 %{SOURCE15} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-hyphen
 install -D -m755 %{SOURCE16} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-maps
+install -D -m755 %{SOURCE17} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-lsr
 # tlpdb for monorepo texlive bin packaging (BuildRequires: texlive-tlpkg)
 install -D -m644 %{SOURCE1} %{buildroot}%{_tlpkgdir}/texlive.tlpdb.xz
 
