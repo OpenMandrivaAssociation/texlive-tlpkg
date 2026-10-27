@@ -31,6 +31,13 @@ if [ -d RELOC ]; then \
 	cp -a RELOC/. . \
 	rm -rf RELOC \
 fi \
+# Keep AddFormat lines. %install writes fmtutil.cnf.d from them; the \
+# file trigger in texlive-tlpkg builds the formats. \
+if [ -d tlpkg/tlpobj ]; then \
+	rm -rf .om-tlpobj \
+	mkdir -p .om-tlpobj \
+	cp -a tlpkg/tlpobj/. .om-tlpobj/ \
+fi \
 rm -rf tlpkg \
 %*
 
@@ -152,6 +159,9 @@ _ucfg="%{buildroot}%{_texmfdistdir}/web2c/updmap.cfg" \
 if [ -f "$_ucfg" ]; then \
 	awk '!/^(Map|MixedMap|KanjiMap)[[:space:]]/ && !/^#![[:space:]]+(Map|MixedMap|KanjiMap)[[:space:]]/' \
 		"$_ucfg" > "$_ucfg.hdr" && mv -f "$_ucfg.hdr" "$_ucfg" \
+fi \
+if [ -d .om-tlpobj ] && [ -x /usr/lib/rpm/texlive-generate-fmtutil-dropin ]; then \
+	/usr/lib/rpm/texlive-generate-fmtutil-dropin .om-tlpobj %{buildroot} \
 fi \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*

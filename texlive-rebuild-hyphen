@@ -84,15 +84,10 @@ if [ -x /usr/bin/mktexlsr ]; then
 	/usr/bin/mktexlsr "${TEXMFSYSVAR}" >/dev/null 2>&1 || :
 fi
 
-# Formats embed hyphenation; rebuild those that load language.dat.
-if [ -x /usr/bin/fmtutil-sys ]; then
-	# Prefer targeted rebuild; fall back to a full refresh.
-	if /usr/bin/fmtutil-sys --byhyphen "${OUTDIR}/language.dat" >/dev/null 2>&1; then
-		:
-	else
-		/usr/bin/fmtutil-sys --refresh >/dev/null 2>&1 || \
-			/usr/bin/fmtutil-sys --all >/dev/null 2>&1 || :
-	fi
+# Formats embed hyphenation. Rebuild only formats listed by installed
+# packages; fmtutil --all would also try every entry in the dist catalogue.
+if [ -x /usr/lib/rpm/texlive-rebuild-formats ]; then
+	/usr/lib/rpm/texlive-rebuild-formats || :
 fi
 
 exit 0

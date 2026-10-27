@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	14
+Release:	15
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing
@@ -50,6 +50,8 @@ Source14:	texlive-bindir-remove.map
 Source15:	texlive-rebuild-hyphen
 Source16:	texlive-rebuild-maps
 Source17:	texlive-rebuild-lsr
+Source18:	texlive-rebuild-formats
+Source19:	texlive-generate-fmtutil-dropin
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -100,6 +102,8 @@ free software, including support for many languages around the world.
 %{_rpmconfigdir}/texlive-rebuild-hyphen
 %{_rpmconfigdir}/texlive-rebuild-maps
 %{_rpmconfigdir}/texlive-rebuild-lsr
+%{_rpmconfigdir}/texlive-rebuild-formats
+%{_rpmconfigdir}/texlive-generate-fmtutil-dropin
 %{_tlpkgdir}/texlive.tlpdb.xz
 
 # Rebuild language.dat/def/lua when hyphen language drop-ins appear or vanish.
@@ -122,6 +126,20 @@ fi
 %transfiletriggerpostun -P 16 -- %{_texmf_updmap_d}
 if [ -x "%{_rpmconfigdir}/texlive-rebuild-maps" ]; then
 	%{_rpmconfigdir}/texlive-rebuild-maps || :
+fi
+
+# Build pdflatex.fmt and the other formats listed by installed packages.
+# Transaction file-trigger priority is not applied by rpm, so this does not
+# rely on running after the hyphen trigger; texlive-rebuild-hyphen calls
+# the same script after it rewrites language.dat.
+%transfiletriggerin -P 17 -- %{_texmf_fmtutil_d}
+if [ -x "%{_rpmconfigdir}/texlive-rebuild-formats" ]; then
+	%{_rpmconfigdir}/texlive-rebuild-formats || :
+fi
+
+%transfiletriggerpostun -P 17 -- %{_texmf_fmtutil_d}
+if [ -x "%{_rpmconfigdir}/texlive-rebuild-formats" ]; then
+	%{_rpmconfigdir}/texlive-rebuild-formats || :
 fi
 
 # Rebuild ls-R when files appear or vanish under a texmf tree. Pass
@@ -168,6 +186,8 @@ install -D -m644 %{SOURCE14} %{buildroot}%{_rpmconfigdir}/texlive-bindir-remove.
 install -D -m755 %{SOURCE15} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-hyphen
 install -D -m755 %{SOURCE16} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-maps
 install -D -m755 %{SOURCE17} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-lsr
+install -D -m755 %{SOURCE18} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-formats
+install -D -m755 %{SOURCE19} %{buildroot}%{_rpmconfigdir}/texlive-generate-fmtutil-dropin
 # tlpdb for monorepo texlive bin packaging (BuildRequires: texlive-tlpkg)
 install -D -m644 %{SOURCE1} %{buildroot}%{_tlpkgdir}/texlive.tlpdb.xz
 

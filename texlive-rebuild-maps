@@ -52,9 +52,10 @@ mkdir -p "${OUTDIR}"
 mv -f "${OUT}.tmp" "${OUT}"
 
 if [ -x /usr/bin/updmap-sys ]; then
-	# Generate psfonts.map etc. into TEXMFSYSVAR. Swallow "map file does
-	# not exist" for Kanji @embed@ templates that need a jaEmbed choice.
-	/usr/bin/updmap-sys --force >/dev/null 2>&1 || :
+	# --cnffile: updmap otherwise merges this file with the full catalogue
+	# in texmf-dist and exits on maps that are not installed. The assembled
+	# file lists only installed packages.
+	/usr/bin/updmap-sys --cnffile "${OUT}" --force >/dev/null 2>&1 || :
 fi
 
 if [ -x /usr/lib/rpm/texlive-rebuild-lsr ]; then

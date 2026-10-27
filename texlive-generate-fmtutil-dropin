@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+# Write %{_texmf_fmtutil_d}/<package> from AddFormat lines in a module's
+# tlpobj. BuildSystem: texlive deletes tlpkg/ during %prep; the macro copies
+# the tlpobjs aside and calls this before the %files scan.
+use strict;
+use warnings;
+use lib "/usr/share/tlpkg";
+use TeXLive::TLUtils ();
+
+my ($tlpdir, $buildroot) = @ARGV;
+die "usage: texlive-generate-fmtutil-dropin TLPDIR BUILDROOT\n"
+	unless defined $tlpdir && defined $buildroot;
+exit 0 unless -d $tlpdir;
+
+my $dest = "$buildroot/usr/share/tlpkg/fmtutil.cnf.d";
+
+opendir(my $dh, $tlpdir) or exit 0;
+while (my $fn = readdir $dh) {
+	next unless $fn =~ /\.tlpobj\z/;
+	my ($name, @exec) = read_formats("$tlpdir/$fn");
+	next unless defined $name && @exec;
+	# Arch binds and doc/source tlpobjs do not own the format list.
+	next if $name =~ /\.(?:doc|source|aarch64-linux|amd64-freebsd|amd64-netbsd|armhf-linux|i386-freebsd|i386-linux|i386-netbsd|universal-darwin|windows|x86_64-cygwin|x86_64-darwinlegacy|x86_64-linux|x86_64-linuxmusl)\z/;
+
+	my @lines;
+	foreach my $e (@exec) {
+	my %r = TeXLive::TLUtils::parse_AddFormat_line($e);
+	next if $r{error} || !$r{name} || !$r{engine};
+	my $mode = $r{mode} ? "" : "#! ";
+	my $patterns = (defined $r{patterns} && $r{patterns} ne "") ? $r{patterns} : "-";
+	my $options = defined $r{options} ? $r{options} : "";
+	push @lines, "$mode$r{name} $r{engine} $patterns $options\n";
+	}
+	next unless @lines;
+
+	system("mkdir", "-p", $dest) == 0 or die "mkdir $dest: $!";
+	open(my $out, ">", "$dest/$name") or die "open $dest/$name: $!";
+	print $out "# from $name:\n";
+	print $out @lines;
+	close($out) or die "close $dest/$name: $!";
+}
+closedir $dh;
+
+sub read_formats {
+	my ($path) = @_;
+	open(my $fh, "<", $path) or return;
+	my ($name, @exec, $pending);
+	while (my $line = <$fh>) {
+	chomp $line;
+	if (defined $pending) {
+	    $line =~ s/^\s+//;
+	    $pending .= " $line";
+	    if ($pending =~ s/\\\s*\z//) {
+		next;
+	    }
+	    push @exec, $pending if $pending =~ s/\AAddFormat\s+//;
+	    $pending = undef;
+	    next;
+	}
+	if ($line =~ /\Aname\s+(\S+)/) {
+	    $name = $1;
+	} elsif ($line =~ /\Aexecute\s+(.*)\z/) {
+	    my $rest = $1;
+	    if ($rest =~ s/\\\s*\z//) {
+		$pending = $rest;
+	    } elsif ($rest =~ s/\AAddFormat\s+//) {
+		push @exec, $rest;
+	    }
+	}
+	}
+	close $fh;
+	return ($name, @exec);
+}
