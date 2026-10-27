@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+# Write language.{dat,def,lua}.d/<package> from AddHyphen lines in a
+# module's tlpobj. BuildSystem: texlive deletes tlpkg/ during %prep; the
+# macro copies the tlpobjs aside and calls this before the %files scan.
+#
+# hyphen-base is skipped. Its language.dat lists every TeX Live language,
+# and the build system replaces that file with language.us. The hyphen
+# file trigger always includes language.us, then these fragments, so the
+# assembled language.dat contains only languages whose patterns are
+# installed.
+use strict;
+use warnings;
+use lib "/usr/share/tlpkg";
+use TeXLive::TLPOBJ;
+
+my ($tlpdir, $buildroot) = @ARGV;
+die "usage: texlive-generate-hyphen-dropin TLPDIR BUILDROOT\n"
+	unless defined $tlpdir && defined $buildroot;
+exit 0 unless -d $tlpdir;
+
+my $root = "$buildroot/usr/share/tlpkg";
+my %dest = (
+	dat => "$root/language.dat.d",
+	def => "$root/language.def.d",
+	lua => "$root/language.lua.d",
+);
+
+opendir(my $dh, $tlpdir) or exit 0;
+while (my $fn = readdir $dh) {
+	next unless $fn =~ /\.tlpobj\z/;
+	my $obj = TeXLive::TLPOBJ->new();
+	$obj->from_file("$tlpdir/$fn");
+	my $name = $obj->name;
+	next unless defined $name && $name ne "";
+	# English lives in hyphen-base's language.us*, which the trigger
+	# always concatenates. Emitting hyphen-base would put the full
+	# catalogue back and break format builds on missing patterns.
+	next if $name eq "hyphen-base";
+	# Doc, source, and arch binds do not own the language list.
+	next if $name =~ /\.(?:doc|source|aarch64-linux|amd64-freebsd|amd64-netbsd|armhf-linux|i386-freebsd|i386-linux|i386-netbsd|universal-darwin|windows|x86_64-cygwin|x86_64-darwinlegacy|x86_64-linux|x86_64-linuxmusl)\z/;
+
+	write_fragment($dest{dat}, $name, $obj->language_dat_lines());
+	write_fragment($dest{def}, $name, $obj->language_def_lines());
+	write_fragment($dest{lua}, $name, $obj->language_lua_lines());
+}
+closedir $dh;
+
+sub write_fragment {
+	my ($dir, $name, @lines) = @_;
+	return unless @lines;
+	system("mkdir", "-p", $dir) == 0 or die "mkdir $dir: $!";
+	open(my $out, ">", "$dir/$name") or die "open $dir/$name: $!";
+	print $out @lines;
+	close($out) or die "close $dir/$name: $!";
+}

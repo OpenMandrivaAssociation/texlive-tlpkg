@@ -28,7 +28,7 @@
 
 Name:		texlive-tlpkg
 Version:	20260709
-Release:	15
+Release:	16
 Summary:	The TeX formatting system
 URL:		https://tug.org/texlive/
 Group:		Publishing
@@ -52,6 +52,7 @@ Source16:	texlive-rebuild-maps
 Source17:	texlive-rebuild-lsr
 Source18:	texlive-rebuild-formats
 Source19:	texlive-generate-fmtutil-dropin
+Source20:	texlive-generate-hyphen-dropin
 BuildArch:	noarch
 
 Requires:	perl-Proc-Daemon
@@ -104,6 +105,7 @@ free software, including support for many languages around the world.
 %{_rpmconfigdir}/texlive-rebuild-lsr
 %{_rpmconfigdir}/texlive-rebuild-formats
 %{_rpmconfigdir}/texlive-generate-fmtutil-dropin
+%{_rpmconfigdir}/texlive-generate-hyphen-dropin
 %{_tlpkgdir}/texlive.tlpdb.xz
 
 # Rebuild language.dat/def/lua when hyphen language drop-ins appear or vanish.
@@ -188,6 +190,7 @@ install -D -m755 %{SOURCE16} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-maps
 install -D -m755 %{SOURCE17} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-lsr
 install -D -m755 %{SOURCE18} %{buildroot}%{_rpmconfigdir}/texlive-rebuild-formats
 install -D -m755 %{SOURCE19} %{buildroot}%{_rpmconfigdir}/texlive-generate-fmtutil-dropin
+install -D -m755 %{SOURCE20} %{buildroot}%{_rpmconfigdir}/texlive-generate-hyphen-dropin
 # tlpdb for monorepo texlive bin packaging (BuildRequires: texlive-tlpkg)
 install -D -m644 %{SOURCE1} %{buildroot}%{_tlpkgdir}/texlive.tlpdb.xz
 

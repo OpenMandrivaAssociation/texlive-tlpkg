@@ -31,8 +31,9 @@ if [ -d RELOC ]; then \
 	cp -a RELOC/. . \
 	rm -rf RELOC \
 fi \
-# Keep AddFormat lines. %install writes fmtutil.cnf.d from them; the \
-# file trigger in texlive-tlpkg builds the formats. \
+# Keep AddFormat and AddHyphen lines. %install writes fmtutil and \
+# language drop-ins from them; file triggers in texlive-tlpkg rebuild \
+# formats and language.dat. \
 if [ -d tlpkg/tlpobj ]; then \
 	rm -rf .om-tlpobj \
 	mkdir -p .om-tlpobj \
@@ -162,6 +163,9 @@ if [ -f "$_ucfg" ]; then \
 fi \
 if [ -d .om-tlpobj ] && [ -x /usr/lib/rpm/texlive-generate-fmtutil-dropin ]; then \
 	/usr/lib/rpm/texlive-generate-fmtutil-dropin .om-tlpobj %{buildroot} \
+fi \
+if [ -d .om-tlpobj ] && [ -x /usr/lib/rpm/texlive-generate-hyphen-dropin ]; then \
+	/usr/lib/rpm/texlive-generate-hyphen-dropin .om-tlpobj %{buildroot} \
 fi \
 /usr/lib/rpm/texlive-generate-files-specpart "%{buildroot}" "%{specpartsdir}" "%{name}" \
 %*
