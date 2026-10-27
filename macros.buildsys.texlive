@@ -31,7 +31,7 @@ if [ -d RELOC ]; then \
 	cp -a RELOC/. . \
 	rm -rf RELOC \
 fi \
-# Keep AddFormat and AddHyphen lines. %install writes fmtutil and \
+# Keep AddFormat and AddHyphen lines. The install script writes fmtutil and \
 # language drop-ins from them; file triggers in texlive-tlpkg rebuild \
 # formats and language.dat. \
 if [ -d tlpkg/tlpobj ]; then \

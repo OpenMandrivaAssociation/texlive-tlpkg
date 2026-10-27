@@ -12,7 +12,10 @@ sources:
   texlive-fixup-bindir: eaf46aff41301591ccc7f7f037b165bdbdc17526
   texlive-engine-links.map: f2fa64eceecd2c9b40a885aa9ac0f6501b374ca1
   texlive-bindir-remove.map: 448fe8aca9a84904aad3d79467fe5fcd17a84766
-  texlive-rebuild-hyphen: a35ed5efc7e58a82f849f9fda2c4eece16f3ce06
-  texlive-rebuild-maps: cdeb454606afa14d3de6838e6ab0c2850ea17603
-  macros.buildsys.texlive: cd91249d4c5170f058999920d1a095dc02b76f64
   texlive-rebuild-lsr: 23dc67245bba516dd29060db35d74ecaf614f131
+  macros.buildsys.texlive: 7197d1933864e17831660b63e47bc3cad4901f4f
+  texlive-rebuild-hyphen: 57203c2aa530af266ced25e4411b786aba0bb0c2
+  texlive-rebuild-maps: e08254c65c3e33312b41eb0cc4af317c29ab7e5d
+  texlive-generate-fmtutil-dropin: b4d1cb14ee6b1d7817a92f97c31212b35b8bd7ae
+  texlive-generate-hyphen-dropin: 736c93370021a230938a2668379539ecc3fd73c4
+  texlive-rebuild-formats: 9f33c8b27db27804382c7562a9541d8c138c08f2
